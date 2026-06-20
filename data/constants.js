@@ -54,13 +54,14 @@ const NAV = [
   { id: "analytics",    label: "Analytics",      icon: "monitoring" },
   { id: "reports",      label: "Reports",        icon: "description" },
   { id: "settings",     label: "Settings",       icon: "settings" },
-  { id: "help",         label: "Help & Support", icon: "help", external: true },
+  { id: "help",         label: "Help & Support", icon: "help" },
 ];
 
 /** Page titles shown in the top bar */
 const TAB_TITLES = {
   dashboard: "Dashboard", transactions: "Transactions", budgets: "Budgets",
   goals: "Savings Goals", analytics: "Analytics", reports: "Reports", settings: "Settings",
+  help: "Help & Support",
 };
 
 /** Donut/bar/line chart color palette */

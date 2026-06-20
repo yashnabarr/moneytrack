@@ -1,5 +1,5 @@
 /**
- * MoneyMint API client + token store.
+ * PockIt API client + token store.
  *
  * Exposes a single global `mmApi` object used by storage.js and auth.js.
  * window.API_BASE_URL must be set in index.html BEFORE this file loads.

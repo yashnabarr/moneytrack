@@ -7,7 +7,7 @@
 .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 32px; }
 .stat {
   background: var(--container-lowest);
-  border: 1px solid rgba(187,202,191,.3); border-left-width: 4px;
+  border: 1px solid var(--border-soft); border-left-width: 4px;
   border-radius: 16px; padding: 24px; box-shadow: var(--soft-shadow);
   display: flex; flex-direction: column; justify-content: space-between;
   min-height: 158px;
@@ -65,7 +65,7 @@
 .filter-search {
   flex: 1; min-width: 200px;
   display: flex; align-items: center; gap: 8px;
-  background: var(--container-lowest); border: 1px solid rgba(187,202,191,.3);
+  background: var(--container-lowest); border: 1px solid var(--border-soft);
   border-radius: 12px; padding: 10px 16px; box-shadow: var(--soft-shadow);
 }
 .filter-search .material-symbols-outlined { color: var(--on-surface-variant); }
@@ -74,7 +74,7 @@
   font-family: inherit; font-size: 15px; width: 100%; color: var(--on-surface);
 }
 .filter-select {
-  background: var(--container-lowest); border: 1px solid rgba(187,202,191,.3);
+  background: var(--container-lowest); border: 1px solid var(--border-soft);
   border-radius: 12px; padding: 10px 16px;
   font-family: inherit; font-size: 14px;
   cursor: pointer; box-shadow: var(--soft-shadow); color: var(--on-surface);
@@ -83,7 +83,7 @@
 /* Transaction rows */
 .tx-list { display: flex; flex-direction: column; gap: 12px; }
 .tx {
-  background: var(--container-lowest); border: 1px solid rgba(187,202,191,.3);
+  background: var(--container-lowest); border: 1px solid var(--border-soft);
   border-radius: 12px; box-shadow: var(--soft-shadow); overflow: hidden;
 }
 .tx-main { display: flex; align-items: center; justify-content: space-between; padding: 16px; cursor: pointer; }
@@ -121,13 +121,13 @@
   color: var(--on-surface);
 }
 .page-btn:hover:not(:disabled):not(.active) { background: var(--container); }
-.page-btn.active   { background: var(--primary); color: #fff; border-color: var(--primary); }
+.page-btn.active   { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
 .page-btn:disabled { opacity: .4; cursor: default; }
 
 /* ===== Budgets page ===== */
 .budget-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 28px; }
 .sumcard {
-  background: var(--container-lowest); border: 1px solid rgba(187,202,191,.3);
+  background: var(--container-lowest); border: 1px solid var(--border-soft);
   border-radius: 16px; padding: 20px 24px; box-shadow: var(--soft-shadow);
 }
 .sumcard p  { font-size: 14px; font-weight: 600; letter-spacing: .03em; color: var(--on-surface-variant); margin-bottom: 6px; }

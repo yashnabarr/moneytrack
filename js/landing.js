@@ -16,12 +16,15 @@ function landingHTML() {
   return `
     <header class="lp-header">
       <div class="lp-nav">
-        <div class="lp-brand"><span class="lp-logo">M</span> MoneyMint</div>
+        <div class="lp-brand">${brandMark(38)} PockIt</div>
         <nav class="lp-links">
           <a href="#features">Features</a>
           <a data-doc="help" href="#" role="link">Help</a>
         </nav>
-        <div class="lp-actions">${authButtons}</div>
+        <div class="lp-actions">
+          <button class="icon-btn-lg lp-theme" data-theme-toggle title="Toggle theme" aria-label="Toggle light/dark theme">${icon(isDarkActive() ? "light_mode" : "dark_mode")}</button>
+          ${authButtons}
+        </div>
       </div>
     </header>
     <main class="landing">
@@ -31,7 +34,7 @@ function landingHTML() {
           <div>
             <span class="badge-pill"><span class="badge-dot"></span> New: AI-Powered Insights</span>
             <h1>Take Control of Your Money.<br/><span class="accent">Build Your Financial Future.</span></h1>
-            <p class="lead">Experience the ultimate clarity in wealth management. MoneyMint combines high-end analytics with effortless expense tracking to accelerate your path to financial freedom.</p>
+            <p class="lead">Experience the ultimate clarity in wealth management. PockIt combines high-end analytics with effortless expense tracking to accelerate your path to financial freedom.</p>
             <div class="hero-cta">
               <button class="btn-hero primary" data-auth="signup">Sign Up Free</button>
               <button class="btn-hero ghost" data-guest>Continue as Guest</button>
@@ -137,7 +140,7 @@ function landingHTML() {
             <div class="luv-item">
               <div class="luv-circle" style="background:#0ea5e9">${icon("cloud_done")}</div>
               <h3>Always available</h3>
-              <p>Works offline. Open MoneyMint anywhere — even without internet.</p>
+              <p>Works offline. Open PockIt anywhere — even without internet.</p>
             </div>
           </div>
         </div>
@@ -258,6 +261,6 @@ function landingFooterHTML() {
           </div>
         </div>
       </div>
-      <div class="lp-foot-base">© 2026 MoneyMint Personal Finance. All rights reserved. Made with ♥ for clarity.</div>
+      <div class="lp-foot-base">© 2026 PockIt Personal Finance. All rights reserved. Made with ♥ for clarity.</div>
     </footer>`;
 }

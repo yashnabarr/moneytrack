@@ -32,6 +32,10 @@ let focusSearch = false;            // restore search-input focus after re-rende
 /* ----- Analytics ----- */
 let anPeriod = "month";             // "month" | "3m" | "year" | "all"
 
+/* ----- Help & Support ----- */
+let helpSearch      = "";           // FAQ search query
+let helpFocusSearch = false;        // restore focus after re-render
+
 /* ----- Modal (shared across tx / budget / goal / funds) ----- */
 let modalOpen = false;
 let modalKind = "tx";               // "tx" | "budget" | "goal" | "funds"

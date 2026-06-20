@@ -18,7 +18,7 @@ function sidebarHTML() {
 
   return `
     <aside class="sidebar ${sidebarCollapsed ? "collapsed" : ""} ${mobileSidebarOpen ? "mobile-open" : ""}">
-      <div class="sb-brand"><span class="sb-logo">M</span><span class="sb-label">MoneyMint</span></div>
+      <div class="sb-brand"><span class="sb-logo">${brandMark(40)}</span><span class="sb-label">PockIt</span></div>
       <nav class="sb-nav">${items}</nav>
       <div class="sb-foot">
         <div class="sb-user">
@@ -43,6 +43,7 @@ function topbarHTML() {
       </div>
       <div class="nav-right">
         <div class="search">${icon("search")}<input type="text" placeholder="Search..." /></div>
+        <button class="icon-btn-lg" data-theme-toggle title="Toggle theme" aria-label="Toggle light/dark theme">${icon(isDarkActive() ? "light_mode" : "dark_mode")}</button>
         <button class="icon-btn-lg" data-doc="help" title="Help">${icon("help")}</button>
       </div>
     </header>`;

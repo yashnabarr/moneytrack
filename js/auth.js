@@ -53,9 +53,12 @@ function authHTML() {
   return `
     <div class="auth-screen">
       <div class="auth-card">
-        <button class="auth-back" data-back-landing>${icon("arrow_back")} Back to home</button>
-        <div class="auth-logo">${icon("account_balance")}</div>
-        <h1>MoneyMint</h1>
+        <div class="auth-top">
+          <button class="auth-back" data-back-landing>${icon("arrow_back")} Back to home</button>
+          <button class="icon-btn-lg" data-theme-toggle title="Toggle theme" aria-label="Toggle light/dark theme">${icon(isDarkActive() ? "light_mode" : "dark_mode")}</button>
+        </div>
+        <div class="auth-logo">${brandMark(60)}</div>
+        <h1>PockIt</h1>
         <p class="auth-sub">Secure access to your wealth.</p>
         <div class="auth-toggle">
           <button class="${!isSignup ? "active" : ""}" data-authtab="signin">Sign In</button>

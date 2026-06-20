@@ -59,6 +59,25 @@ function moneyShort(n) {
 /** Render a Material Symbols icon. */
 function icon(name) { return '<span class="material-symbols-outlined">' + name + '</span>'; }
 
+/**
+ * PockIt brand mark — a rounded-square badge (emerald→teal gradient) holding a
+ * white "value rising out of a pocket" glyph. Self-contained SVG that scales
+ * crisply and looks identical in light and dark themes. Used for the sidebar,
+ * landing nav, auth screen, footer and favicon.
+ */
+function brandMark(px = 40) {
+  return `<svg class="brand-mark" width="${px}" height="${px}" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="PockIt logo">
+  <rect width="40" height="40" rx="11" fill="url(#pockitGrad)"/>
+  <path d="M12 24v2a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-2" stroke="#ffffff" stroke-opacity=".65" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+  <path d="M20 26V12M14.4 18 20 12l5.6 6" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <defs>
+    <linearGradient id="pockitGrad" x1="3" y1="2" x2="37" y2="38" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#10b981"/><stop offset="1" stop-color="#44e2cd"/>
+    </linearGradient>
+  </defs>
+</svg>`;
+}
+
 /** Look up the icon name for a transaction category. */
 function catIcon(cat) { return CAT_ICON[cat] || "category"; }
 

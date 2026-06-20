@@ -1,7 +1,7 @@
 {
-  "name": "moneymint-api",
+  "name": "pockit-api",
   "version": "1.0.0",
-  "description": "MoneyMint REST API",
+  "description": "PockIt REST API",
   "main": "api/index.js",
   "scripts": {
     "dev": "nodemon api/index.js",

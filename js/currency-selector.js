@@ -63,7 +63,7 @@ function onboardingHTML() {
       <div class="onb-card">
         <div class="onb-head">
           <div class="onb-icon">${icon("language")}</div>
-          <h2>Welcome to MoneyMint</h2>
+          <h2>Welcome to PockIt</h2>
           <p>Pick your country so we can format your money correctly.</p>
         </div>
         <div class="onb-body">

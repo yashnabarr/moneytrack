@@ -5,7 +5,7 @@ const app = require('../src/app');
 if (require.main === module) {
   const PORT = process.env.PORT || 3001;
   app.listen(PORT, () => {
-    console.log(`MoneyMint API → http://localhost:${PORT}`);
+    console.log(`PockIt API → http://localhost:${PORT}`);
   });
 }
 

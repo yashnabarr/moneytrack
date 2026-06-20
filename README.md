@@ -1,4 +1,4 @@
-# MoneyMint — Personal Finance Tracker
+# PockIt — Personal Finance Tracker
 
 A polished, offline-first personal-finance web app. Track income & expenses,
 set monthly budgets, save toward goals, and explore your spending with
@@ -23,7 +23,7 @@ No build step, no install. Just open `index.html`.
 ## Project structure
 
 ```
-moneymint/
+pockit/
 ├── index.html                  Clean shell: <link> + <script> only.
 ├── README.md                   This file.
 │

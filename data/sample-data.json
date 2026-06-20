@@ -1,0 +1,6 @@
+{
+  "_comment": "Optional starter data — not loaded automatically. To use, paste arrays into localStorage under the matching mt_* keys.",
+  "mt_transactions": [],
+  "mt_budgets": [],
+  "mt_goals": []
+}

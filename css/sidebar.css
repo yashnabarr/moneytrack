@@ -1,0 +1,106 @@
+/* =====================================================
+   sidebar.css — app shell layout (sidebar + topbar)
+   ===================================================== */
+
+.app-layout { display: flex; min-height: 100vh; }
+
+/* ===== Sidebar ===== */
+.sidebar {
+  width: 264px; flex-shrink: 0;
+  background: var(--container-lowest);
+  border-right: 1px solid rgba(187,202,191,.4);
+  display: flex; flex-direction: column;
+  position: sticky; top: 0; height: 100vh;
+  transition: width .2s;
+}
+.sidebar.collapsed { width: 78px; }
+
+.sb-brand {
+  display: flex; align-items: center; gap: 10px;
+  padding: 18px 20px; font-size: 20px; font-weight: 700;
+  color: var(--primary); white-space: nowrap; overflow: hidden;
+}
+.sb-logo {
+  width: 40px; height: 40px; background: var(--primary); color: #fff;
+  border-radius: 12px; display: flex; align-items: center; justify-content: center;
+  font-weight: 700; flex-shrink: 0;
+}
+.sidebar.collapsed .sb-label,
+.sidebar.collapsed .sb-brand .sb-label { display: none; }
+
+.sb-nav {
+  flex: 1; padding: 12px;
+  display: flex; flex-direction: column; gap: 4px;
+  overflow-y: auto;
+}
+.sb-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 12px; border-radius: 12px;
+  color: var(--secondary); cursor: pointer;
+  border: none; background: none; font-family: inherit; font-size: 15px;
+  width: 100%; text-align: left;
+  white-space: nowrap; overflow: hidden;
+  transition: background .15s, color .15s;
+}
+.sb-item:hover { background: var(--container-low); color: var(--primary); }
+.sb-item.active { background: var(--primary); color: #fff; }
+.sb-item .material-symbols-outlined { font-size: 22px; flex-shrink: 0; }
+
+/* Footer (user card + log out) */
+.sb-foot { padding: 12px; border-top: 1px solid rgba(187,202,191,.4); }
+.sb-user { display: flex; align-items: center; gap: 10px; padding: 6px; overflow: hidden; }
+.sb-avatar {
+  width: 40px; height: 40px; border-radius: 9999px;
+  background: var(--primary-container); color: var(--on-primary-container);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; flex-shrink: 0;
+}
+.sb-uinfo    { overflow: hidden; }
+.sb-username { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sb-role     { font-size: 12px; color: var(--on-surface-variant); }
+.sidebar.collapsed .sb-uinfo,
+.sidebar.collapsed .sb-logout-text { display: none; }
+
+.sb-logout {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; margin-top: 8px;
+  padding: 10px 12px; border-radius: 12px;
+  border: none; background: none; cursor: pointer;
+  color: var(--error); font-family: inherit; font-weight: 600; font-size: 14px;
+}
+.sb-logout:hover { background: var(--error-container); }
+
+/* ===== Body + topbar ===== */
+.app-body { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.app-topbar {
+  height: 64px; background: var(--container-lowest);
+  border-bottom: 1px solid rgba(187,202,191,.4);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px; position: sticky; top: 0; z-index: 40;
+}
+.topbar-left  { display: flex; align-items: center; gap: 12px; }
+.topbar-title { font-size: 18px; font-weight: 700; }
+
+.nav-right { display: flex; align-items: center; gap: 16px; }
+.search {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--container); border-radius: 9999px;
+  padding: 8px 16px; width: 240px;
+}
+.search input {
+  border: none; background: transparent; outline: none;
+  font-family: inherit; font-size: 14px; width: 100%; color: var(--on-surface);
+}
+.search .material-symbols-outlined { color: var(--on-surface-variant); font-size: 20px; }
+
+.icon-btn-lg {
+  width: 40px; height: 40px; border-radius: 9999px;
+  border: none; background: none; cursor: pointer;
+  color: var(--on-surface-variant);
+  display: flex; align-items: center; justify-content: center;
+}
+.icon-btn-lg:hover { background: var(--container); color: var(--on-surface); }
+
+.hamburger      { display: none; }
+.app-content    { padding: 28px 24px 48px; flex: 1; }
+.sidebar-overlay { display: none; }

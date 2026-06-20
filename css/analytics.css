@@ -1,0 +1,47 @@
+/* =====================================================
+   analytics.css — Analytics page (stats, insights, charts)
+   ===================================================== */
+
+.an-actions { display: flex; gap: 12px; align-items: center; }
+
+/* Two-column layout: insight cards (left) + spending trend (right). */
+.analytics-grid {
+  display: grid; grid-template-columns: 1fr 2fr; gap: 24px;
+  margin-bottom: 24px; align-items: stretch;
+}
+.an-left { display: flex; flex-direction: column; gap: 24px; }
+
+/* Lower row: donut + monthly comparison side by side. */
+.charts-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+
+/* ===== Insight cards (left column) ===== */
+.insight { border-left-width: 4px; }
+.ic-top {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 600; letter-spacing: .05em;
+  text-transform: uppercase;
+}
+.insight h4 { font-size: 18px; font-weight: 700; margin: 8px 0 6px; }
+.insight p  { font-size: 14px; color: var(--on-surface-variant); line-height: 1.5; }
+
+.net-card p.lbl { font-size: 13px; font-weight: 600; color: var(--on-surface-variant); }
+.net-card .net-val { font-size: 34px; font-weight: 700; letter-spacing: -.01em; margin-top: 4px; }
+
+/* ===== Generic chart container ===== */
+svg.chart { width: 100%; height: auto; display: block; }
+.chart-legend {
+  display: flex; gap: 18px; flex-wrap: wrap;
+  margin-top: 12px; font-size: 13px; color: var(--on-surface-variant);
+}
+.legend-item { display: flex; align-items: center; gap: 6px; }
+.legend-dot  { width: 11px; height: 11px; border-radius: 9999px; flex-shrink: 0; }
+.legend-line { width: 16px; height: 3px; border-radius: 9999px; }
+
+/* ===== Donut chart (Expense Breakdown) ===== */
+.donut-wrap   { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+.donut        { width: 160px; height: 160px; flex-shrink: 0; }
+.donut-center { font-weight: 700; text-anchor: middle; dominant-baseline: central; font-family: "Inter", sans-serif; }
+.donut-legend { flex: 1; min-width: 160px; display: flex; flex-direction: column; gap: 10px; }
+.donut-row    { display: flex; align-items: center; justify-content: space-between; font-size: 14px; }
+.donut-left   { display: flex; align-items: center; gap: 8px; }
+.donut-pct    { color: var(--on-surface-variant); font-variant-numeric: tabular-nums; }

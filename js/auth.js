@@ -1,0 +1,84 @@
+/**
+ * Authentication: storage, helpers, screen builder.
+ * Note: this is local-only auth (no backend). Sign-in just persists a name+email
+ * to localStorage so the UI can tailor the experience.
+ */
+
+/* ===== Auth state in storage ===== */
+function getAuth() { return storage.get(KEYS.auth, null); }
+function setAuth(a) { storage.save(KEYS.auth, a); }
+
+/** Build a friendly display name from an email address. */
+function nameFromEmail(email) {
+  const base = (email || "").split("@")[0].replace(/[._-]+/g, " ").trim();
+  return base ? base.replace(/\b\w/g, c => c.toUpperCase()) : "User";
+}
+
+/** Sign in: save auth, jump to the app shell, reset transient UI. */
+function login(auth) {
+  setAuth(auth);
+  appScreen = "app";
+  activeTab = "dashboard";
+  mobileSidebarOpen = false;
+  render();
+  window.scrollTo(0, 0);
+}
+
+/**
+ * Called after a successful API login/register response.
+ * Stores tokens, hydrates localStorage from the server, then enters the app.
+ */
+async function apiLogin(serverResponse) {
+  mmApi.tokenStore.set(serverResponse.accessToken, serverResponse.refreshToken);
+  setAuth({ name: serverResponse.user.name, email: serverResponse.user.email });
+  await loadFromApi();
+  login({ name: serverResponse.user.name, email: serverResponse.user.email });
+}
+
+/** Sign out: revoke refresh token on server, clear tokens, return to landing. */
+function logout() {
+  const rt = mmApi.tokenStore.getRefresh();
+  if (rt) mmApi.authPost('/api/auth/logout', { refreshToken: rt }).catch(() => {});
+  mmApi.tokenStore.clear();
+  storage.remove(KEYS.auth);
+  appScreen = "landing";
+  render();
+  window.scrollTo(0, 0);
+}
+
+/* ===== Auth screen markup ===== */
+
+function authHTML() {
+  const isSignup = authTab === "signup";
+  return `
+    <div class="auth-screen">
+      <div class="auth-card">
+        <button class="auth-back" data-back-landing>${icon("arrow_back")} Back to home</button>
+        <div class="auth-logo">${icon("account_balance")}</div>
+        <h1>MoneyMint</h1>
+        <p class="auth-sub">Secure access to your wealth.</p>
+        <div class="auth-toggle">
+          <button class="${!isSignup ? "active" : ""}" data-authtab="signin">Sign In</button>
+          <button class="${isSignup ? "active" : ""}" data-authtab="signup">Sign Up</button>
+        </div>
+        <form id="auth-form">
+          ${isSignup ? `<div class="auth-field"><input id="a-name" type="text" placeholder="Full Name" /></div>` : ""}
+          <div class="auth-field"><input id="a-email" type="email" placeholder="Email Address" /></div>
+          <div class="auth-field pw-wrap">
+            <input id="a-pass" type="${showPassword ? "text" : "password"}" placeholder="Password" />
+            <button type="button" class="pw-toggle" data-pwtoggle>${icon(showPassword ? "visibility_off" : "visibility")}</button>
+          </div>
+          ${!isSignup ? `
+          <div class="auth-row">
+            <label><input type="checkbox" /> Remember me</label>
+            <a href="#" data-doc="help">Forgot Password?</a>
+          </div>` : `<div style="height:8px"></div>`}
+          <button type="submit" class="btn-auth">${isSignup ? "Create Account" : "Sign In"}</button>
+        </form>
+        <button class="auth-guest" data-guest>Continue as Guest</button>
+        <div class="auth-divider">OR CONTINUE WITH</div>
+        <button class="btn-social" data-social="Google">${icon("g_translate")} Continue with Google</button>
+        <button class="btn-social github" data-social="GitHub">${icon("code")} Continue with GitHub</button>
+      </div>
+    </div>`;
+}

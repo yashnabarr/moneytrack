@@ -1,0 +1,65 @@
+/* =====================================================
+   responsive.css — all media queries in one place
+   ===================================================== */
+
+/* ---------- ≤ 1024px: tablets ---------- */
+@media (max-width: 1024px) {
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .bento { grid-template-columns: 1fr; }
+}
+
+/* ---------- ≤ 900px: small tablets ---------- */
+@media (max-width: 900px) {
+  /* Sidebar collapses into a slide-in drawer */
+  .sidebar {
+    position: fixed; left: -300px; top: 0; height: 100vh;
+    z-index: 100; width: 264px; transition: left .25s;
+  }
+  .sidebar.mobile-open { left: 0; box-shadow: 0 20px 50px rgba(0,0,0,.3); }
+  .sidebar.collapsed { width: 264px; }
+  .sidebar.collapsed .sb-label,
+  .sidebar.collapsed .sb-uinfo,
+  .sidebar.collapsed .sb-logout-text { display: block; }
+  .sidebar-overlay.show {
+    display: block; position: fixed; inset: 0;
+    background: rgba(0,0,0,.4); z-index: 90;
+  }
+  .collapse-btn { display: none; }
+  .hamburger    { display: flex; }
+
+  /* Landing */
+  .hero-grid { grid-template-columns: 1fr; }
+  .hero-visual { display: none; }
+  .lp-links { display: none; }
+  .feature-grid { grid-template-columns: 1fr; }
+  .hero h1 { font-size: 36px; }
+  .cta-section h2 { font-size: 30px; }
+
+  /* Awards / luv / steps */
+  .awards-inner { grid-template-columns: 1fr; gap: 28px; }
+  .luv-grid { grid-template-columns: 1fr; gap: 28px; }
+  .step { grid-template-columns: 1fr; gap: 24px; padding: 32px 0; }
+  .step.reverse .step-text { order: 0; }
+  .step-num { font-size: 160px; }
+  .lp-footer-inner { grid-template-columns: 1fr 1fr; }
+}
+@media (min-width: 901px) { .hamburger { display: none; } }
+
+/* ---------- ≤ 720px: phones ---------- */
+@media (max-width: 720px) {
+  .search, .footer-links { display: none; }
+  .page-head h1 { font-size: 30px; }
+  .stats { grid-template-columns: 1fr; }
+  .row2 { grid-template-columns: 1fr; }
+  .tx-details { padding-left: 16px; }
+  .budget-summary { grid-template-columns: 1fr; }
+  .budget-grid    { grid-template-columns: 1fr; }
+  .goal-grid      { grid-template-columns: 1fr; }
+  .analytics-grid { grid-template-columns: 1fr; }
+  .charts-2       { grid-template-columns: 1fr; }
+}
+
+/* ---------- ≤ 520px: small phones ---------- */
+@media (max-width: 520px) {
+  .popular-grid { grid-template-columns: repeat(2, 1fr); }
+}

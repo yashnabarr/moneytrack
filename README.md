@@ -1,15 +1,26 @@
 # PockIt — Personal Finance Tracker
 
-A polished, offline-first personal-finance web app. Track income & expenses,
-set monthly budgets, save toward goals, and explore your spending with
-beautiful charts.
+> **Live demo →** [moneytrack-23qk.vercel.app](https://moneytrack-23qk.vercel.app/)
 
-The **frontend** is a zero-build, vanilla HTML/CSS/JS single-page app that runs
-entirely from `localStorage` — open it and it works, no server required. An
-**optional Node/Express + Prisma backend** (in [`backend/`](backend/)) adds user
-accounts (email/password + Google OAuth) and cross-device sync. When you're
-signed in, your data syncs to the backend automatically; as a guest or offline,
-everything stays local in your browser.
+A polished, offline-first personal-finance web app. Track income & expenses, set monthly budgets, save toward goals, and explore your spending with beautiful charts — all with a sleek light/dark theme and zero install.
+
+The **frontend** is a zero-build, vanilla HTML/CSS/JS single-page app that runs entirely from `localStorage` — open it and it works, no server required. An **optional Node/Express + Prisma backend** (in [`backend/`](backend/)) adds user accounts (email/password + Google OAuth) and cross-device sync. When you're signed in, your data syncs to the backend automatically; as a guest or offline, everything stays local in your browser.
+
+---
+
+## Features
+
+- **Dashboard** — income, expenses, balance at a glance with sparkline stat cards
+- **Transactions** — add, edit, filter, search and paginate all your entries
+- **Budgets** — per-category monthly limits with progress bars and overspend alerts
+- **Goals** — savings targets with circular ring progress and add-funds flow
+- **Analytics** — spending by category (donut chart), trends, insights and CSV export
+- **Settings** — date format, notifications, backup/restore, clear data
+- **Help & Support** — searchable FAQ, contact, live system status
+- **Dark theme** — "Obsidian Emerald" palette, persisted in `localStorage`, no flash on load
+- **Offline-first** — works fully as a guest with no backend
+
+---
 
 ## Quick start (frontend only)
 
@@ -19,16 +30,34 @@ No build step, no install. Just open `index.html`.
 - **Best (avoids some browser security limits):** serve it locally:
 
   ```bash
-  # any of these works from inside the project root
   npx http-server -p 8080
+  # or
   python -m http.server 8080
   ```
 
   Then open <http://localhost:8080>.
 
 Used this way (no backend running), the app stores everything in `localStorage`.
-Sign-up/sign-in and Google login require the backend below; **Continue as Guest**
-works fully offline.
+Sign-up/sign-in and Google login require the backend below; **Continue as Guest** works fully offline.
+
+---
+
+## Deployment
+
+| Layer | Service | URL |
+|-------|---------|-----|
+| Frontend | Vercel (static) | [moneytrack-23qk.vercel.app](https://moneytrack-23qk.vercel.app/) |
+| Backend API | Vercel (serverless) | `moneytrack-phi.vercel.app` |
+| Database | Neon (PostgreSQL) | Neon free tier |
+
+To redeploy after changes:
+```bash
+git add .
+git commit -m "your message"
+git push   # Vercel auto-redeploys both frontend and backend
+```
+
+---
 
 ## Project structure
 
@@ -81,115 +110,78 @@ pockit/
         └── utils/tokens.js     Access/refresh JWT helpers.
 ```
 
-### What lives where
-
-- **HTML.** `index.html` contains only the shell. Every page (landing, auth,
-  dashboard, etc.) is rendered into `<div id="root"></div>` by JavaScript —
-  this is a single-page app.
-- **CSS.** Variables live in `css/main.css` (load it first). Every other
-  stylesheet uses those tokens; no inline styles for theming.
-- **JS.** All view markup is generated from JavaScript modules using template
-  literals — easier to reason about than scattered HTML fragments. Each
-  feature module owns its view + its modal + its persistence.
-
-### Script load order
-
-Scripts run top-to-bottom (no modules, no bundler), so order matters:
-
-```
-data/constants.js  ← pure data
-js/storage.js      ← persistence
-js/state.js        ← shared mutable state
-js/helpers.js      ← formatters (uses storage + constants)
-js/docs.js         ← "open in new tab" pages
-js/auth.js
-js/currency-selector.js
-js/sidebar.js
-js/landing.js
-js/dashboard.js
-js/transactions.js
-js/budgets.js
-js/goals.js
-js/analytics.js
-js/app.js          ← renders + boots — must load last
-```
+---
 
 ## Architecture in one paragraph
 
-The app is a single-page app rendered as one big string from `render()` in
-`js/app.js`. State (current screen, active tab, open modals, form values,
-filters) lives as plain `let`s in `js/state.js`. After every state change,
-`render()` rebuilds the HTML and re-attaches event listeners. Persisted data
-(transactions, budgets, goals, auth, country) lives in `localStorage`,
-accessed exclusively through `js/storage.js`. When the user is signed in,
-`js/storage.js` also fires background create/update/delete calls to the backend
-(via `js/api.js`) so the browser cache and the server stay in sync — the UI is
-never blocked on the network. Money is always formatted through `money()` /
-`moneyShort()` in `js/helpers.js`, which honour the country chosen in the
-onboarding popup.
+The app is a single-page app rendered as one big string from `render()` in `js/app.js`. State (current screen, active tab, open modals, form values, filters) lives as plain `let`s in `js/state.js`. After every state change, `render()` rebuilds the HTML and re-attaches event listeners. Persisted data (transactions, budgets, goals, auth, country) lives in `localStorage`, accessed exclusively through `js/storage.js`. When the user is signed in, `js/storage.js` also fires background create/update/delete calls to the backend (via `js/api.js`) so the browser cache and the server stay in sync — the UI is never blocked on the network. Money is always formatted through `money()` / `moneyShort()` in `js/helpers.js`, which honour the country chosen in the onboarding popup.
+
+---
 
 ## Adding a new feature
 
-When you add a feature, **put each piece in the right file** — do not stuff
-new code back into `index.html`:
+When you add a feature, **put each piece in the right file** — do not stuff new code back into `index.html`:
 
-- **A new view (page).** Create `js/<feature>.js` that exports a
-  `<feature>HTML()` builder. Add a `case` in `contentHTML()` (`js/app.js`)
-  and a row in `NAV` (`data/constants.js`).
-- **A new modal.** Add a `<feature>ModalHTML()` builder + open/save/close
-  functions in the feature module. Add a branch in `modalHTML()` and
-  `readForm()` in `js/app.js`, plus a saver in the `saver` lookup.
-- **New styles.** Add a class to the most relevant existing CSS file. Use
-  the existing tokens (`var(--primary)` etc.) rather than hard-coded colors.
-- **New persisted data.** Add a key to `KEYS` in `data/constants.js` and
-  initialize it inside `initializeDefaultData()` in `js/storage.js`.
+- **A new view (page).** Create `js/<feature>.js` that exports a `<feature>HTML()` builder. Add a `case` in `contentHTML()` (`js/app.js`) and a row in `NAV` (`data/constants.js`).
+- **A new modal.** Add a `<feature>ModalHTML()` builder + open/save/close functions in the feature module. Add a branch in `modalHTML()` and `readForm()` in `js/app.js`, plus a saver in the `saver` lookup.
+- **New styles.** Add a class to the most relevant existing CSS file. Use the existing tokens (`var(--primary)` etc.) rather than hard-coded colors.
+- **New persisted data.** Add a key to `KEYS` in `data/constants.js` and initialize it inside `initializeDefaultData()` in `js/storage.js`.
+
+---
 
 ## Where data is stored
 
-The browser always keeps a local copy in `localStorage` (this is the source of
-truth when offline / signed out):
+The browser always keeps a local copy in `localStorage` (this is the source of truth when offline / signed out):
 
-| Key                 | Contents                                         |
+| Key | Contents |
 | ------------------- | ------------------------------------------------ |
-| `mt_transactions`   | Array of transactions                            |
-| `mt_budgets`        | Array of category budgets                        |
-| `mt_goals`          | Array of savings goals                           |
-| `mt_auth`           | `{ name, email, guest? }` for the signed-in user |
-| `mt_country`        | `{ code }` of the chosen country                 |
-| `mt_prefs`          | UI preferences (theme, date format, notifications) |
-| `mt_access_token`   | JWT access token (only while signed in)          |
-| `mt_refresh_token`  | JWT refresh token (only while signed in)         |
+| `mt_transactions` | Array of transactions |
+| `mt_budgets` | Array of category budgets |
+| `mt_goals` | Array of savings goals |
+| `mt_auth` | `{ name, email, guest? }` for the signed-in user |
+| `mt_country` | `{ code }` of the chosen country |
+| `mt_prefs` | UI preferences (theme, date format, notifications) |
+| `mt_access_token` | JWT access token (only while signed in) |
+| `mt_refresh_token` | JWT refresh token (only while signed in) |
 
-When signed in, transactions / budgets / goals are **also** persisted to the
-backend database and re-hydrated on login, so they follow you across devices.
+When signed in, transactions / budgets / goals are **also** persisted to the backend database and re-hydrated on login, so they follow you across devices.
 
-To wipe local data, open **Settings → Clear all data**, or run
-`localStorage.clear()` in DevTools. (This clears the browser copy only; data
-already synced to the backend stays on the server.)
+To wipe local data, open **Settings → Clear all data**, or run `localStorage.clear()` in DevTools. (This clears the browser copy only; data already synced to the backend stays on the server.)
+
+---
 
 ## Backend (optional)
 
-The `backend/` folder is a standalone Node/Express API backed by Prisma. It
-provides authentication (email/password + Google OAuth, JWT access/refresh
-tokens) and CRUD sync for transactions, budgets and goals.
+The `backend/` folder is a standalone Node/Express API backed by Prisma + PostgreSQL. It provides authentication (email/password + Google OAuth, JWT access/refresh tokens) and CRUD sync for transactions, budgets and goals.
 
 ```bash
 cd backend
 npm install
-cp .env.example .env          # then fill in DATABASE_URL, JWT secrets, OAuth creds
-npm run db:push               # create the schema
+cp .env.example .env          # fill in DATABASE_URL, JWT secrets, OAuth creds
+npm run db:push               # push schema to database
 npm run dev                   # starts the API on http://localhost:3001
 ```
 
-Point the frontend at it by setting `window.API_BASE_URL` in `index.html`
-(defaults to `http://localhost:3001`). The API is also Vercel-ready via
-`backend/vercel.json`. If you never run the backend, the app still works fully
-as a local, offline tracker.
+**Required environment variables (set in Vercel → Settings → Environment Variables):**
+
+| Variable | Description |
+|----------|-------------|
+| `DATABASE_URL` | PostgreSQL connection string (e.g. from Neon) |
+| `JWT_SECRET` | Random secret for access tokens |
+| `JWT_REFRESH_SECRET` | Random secret for refresh tokens |
+| `NODE_ENV` | `production` |
+| `FRONTEND_URL` | Your frontend's Vercel URL (for CORS) |
+| `GOOGLE_CLIENT_ID` | *(optional)* Google OAuth client ID |
+| `GOOGLE_CLIENT_SECRET` | *(optional)* Google OAuth client secret |
+
+The API is Vercel-ready via `backend/vercel.json`. If you never run the backend, the app still works fully as a local, offline tracker.
+
+---
 
 ## Browser support
 
-Modern Chromium, Firefox, Safari, and Edge. Uses `Intl.NumberFormat`,
-`URL.createObjectURL`, CSS variables, `backdrop-filter` (with `-webkit-`
-fallback), and `color-mix()` for theme-aware tints. Light and dark themes are
-driven by a `theme-dark` class on `<html>`, applied before first paint and
-persisted in `localStorage`.
+Modern Chromium, Firefox, Safari, and Edge. Uses `Intl.NumberFormat`, `URL.createObjectURL`, CSS custom properties, and `backdrop-filter` (with `-webkit-` fallback). Light and dark themes are driven by a `theme-dark` class on `<html>`, applied before first paint via an inline script in `<head>` — no flash of unstyled content.
+
+---
+
+*Built with vanilla HTML, CSS, and JavaScript — no framework, no bundler, no dependencies.*

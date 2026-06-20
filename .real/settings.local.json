@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node --check js/app.js)",
+      "Bash(node --check js/state.js)",
+      "Bash(node --check data/constants.js)",
+      "mcp__Claude_Preview__preview_start"
+    ]
+  }
+}

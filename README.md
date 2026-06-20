@@ -2,10 +2,16 @@
 
 A polished, offline-first personal-finance web app. Track income & expenses,
 set monthly budgets, save toward goals, and explore your spending with
-beautiful charts — all without a backend. Data lives in your browser's
-`localStorage`.
+beautiful charts.
 
-## Quick start
+The **frontend** is a zero-build, vanilla HTML/CSS/JS single-page app that runs
+entirely from `localStorage` — open it and it works, no server required. An
+**optional Node/Express + Prisma backend** (in [`backend/`](backend/)) adds user
+accounts (email/password + Google OAuth) and cross-device sync. When you're
+signed in, your data syncs to the backend automatically; as a guest or offline,
+everything stays local in your browser.
+
+## Quick start (frontend only)
 
 No build step, no install. Just open `index.html`.
 
@@ -19,6 +25,10 @@ No build step, no install. Just open `index.html`.
   ```
 
   Then open <http://localhost:8080>.
+
+Used this way (no backend running), the app stores everything in `localStorage`.
+Sign-up/sign-in and Google login require the backend below; **Continue as Guest**
+works fully offline.
 
 ## Project structure
 
@@ -34,10 +44,12 @@ pockit/
 │   ├── sidebar.css             App shell: sidebar, topbar, layout.
 │   ├── dashboard.css           Dashboard + Transactions + Budgets + Goals views.
 │   ├── analytics.css           Analytics page (stats, insights, charts, donut).
+│   ├── settings.css            Settings + Help pages and the light/dark theme tokens' consumers.
 │   └── responsive.css          All media queries.
 │
 ├── js/                         JavaScript modules (plain script tags, no bundler).
-│   ├── storage.js              localStorage wrapper + first-time data setup.
+│   ├── api.js                  REST client + JWT token store (talks to the backend).
+│   ├── storage.js              localStorage wrapper + background sync to the backend.
 │   ├── state.js                In-memory UI state (mutable globals).
 │   ├── helpers.js              Country/locale, money formatters, icon, escapeHtml, dates, ringHTML.
 │   ├── docs.js                 "Open Help / Privacy / Terms / Contact in a new tab" helper.
@@ -52,9 +64,21 @@ pockit/
 │   ├── analytics.js            Analytics view + CSV export + SVG charts.
 │   └── app.js                  Orchestrator: Reports + Settings + render() + boot.
 │
-└── data/
-    ├── constants.js            Pure data: KEYS, COUNTRIES, CATEGORIES, NAV, etc.
-    └── sample-data.json        Optional starter data shape (not auto-loaded).
+├── data/
+│   ├── constants.js            Pure data: KEYS, COUNTRIES, CATEGORIES, NAV, etc.
+│   └── sample-data.json        Optional starter data shape (not auto-loaded).
+│
+└── backend/                    Optional Node/Express + Prisma API (deployable to Vercel).
+    ├── api/index.js            Entry point (local server + Vercel handler).
+    ├── prisma/schema.prisma    Database schema (users, transactions, budgets, goals).
+    ├── .env.example            Required environment variables.
+    └── src/
+        ├── app.js              Express app: CORS, routes, error handling.
+        ├── config/             Prisma client + Passport (Google OAuth) setup.
+        ├── controllers/        auth, transactions, budgets, goals, user.
+        ├── middleware/         JWT auth, rate limiting, request validation.
+        ├── routes/             REST endpoints under /api/*.
+        └── utils/tokens.js     Access/refresh JWT helpers.
 ```
 
 ### What lives where
@@ -97,9 +121,12 @@ The app is a single-page app rendered as one big string from `render()` in
 filters) lives as plain `let`s in `js/state.js`. After every state change,
 `render()` rebuilds the HTML and re-attaches event listeners. Persisted data
 (transactions, budgets, goals, auth, country) lives in `localStorage`,
-accessed exclusively through `js/storage.js`. Money is always formatted
-through `money()` / `moneyShort()` in `js/helpers.js`, which honour the
-country chosen in the onboarding popup.
+accessed exclusively through `js/storage.js`. When the user is signed in,
+`js/storage.js` also fires background create/update/delete calls to the backend
+(via `js/api.js`) so the browser cache and the server stay in sync — the UI is
+never blocked on the network. Money is always formatted through `money()` /
+`moneyShort()` in `js/helpers.js`, which honour the country chosen in the
+onboarding popup.
 
 ## Adding a new feature
 
@@ -119,22 +146,50 @@ new code back into `index.html`:
 
 ## Where data is stored
 
-Everything lives in your browser's `localStorage` under these keys:
+The browser always keeps a local copy in `localStorage` (this is the source of
+truth when offline / signed out):
 
-| Key               | Contents                                       |
-| ----------------- | ---------------------------------------------- |
-| `mt_transactions` | Array of transactions                          |
-| `mt_budgets`      | Array of category budgets                      |
-| `mt_goals`        | Array of savings goals                         |
-| `mt_auth`         | `{ name, email, guest? }` for the signed-in user |
-| `mt_country`      | `{ code }` of the chosen country               |
+| Key                 | Contents                                         |
+| ------------------- | ------------------------------------------------ |
+| `mt_transactions`   | Array of transactions                            |
+| `mt_budgets`        | Array of category budgets                        |
+| `mt_goals`          | Array of savings goals                           |
+| `mt_auth`           | `{ name, email, guest? }` for the signed-in user |
+| `mt_country`        | `{ code }` of the chosen country                 |
+| `mt_prefs`          | UI preferences (theme, date format, notifications) |
+| `mt_access_token`   | JWT access token (only while signed in)          |
+| `mt_refresh_token`  | JWT refresh token (only while signed in)         |
 
-To wipe everything, open **Settings → Clear all data**, or run
-`localStorage.clear()` in DevTools.
+When signed in, transactions / budgets / goals are **also** persisted to the
+backend database and re-hydrated on login, so they follow you across devices.
+
+To wipe local data, open **Settings → Clear all data**, or run
+`localStorage.clear()` in DevTools. (This clears the browser copy only; data
+already synced to the backend stays on the server.)
+
+## Backend (optional)
+
+The `backend/` folder is a standalone Node/Express API backed by Prisma. It
+provides authentication (email/password + Google OAuth, JWT access/refresh
+tokens) and CRUD sync for transactions, budgets and goals.
+
+```bash
+cd backend
+npm install
+cp .env.example .env          # then fill in DATABASE_URL, JWT secrets, OAuth creds
+npm run db:push               # create the schema
+npm run dev                   # starts the API on http://localhost:3001
+```
+
+Point the frontend at it by setting `window.API_BASE_URL` in `index.html`
+(defaults to `http://localhost:3001`). The API is also Vercel-ready via
+`backend/vercel.json`. If you never run the backend, the app still works fully
+as a local, offline tracker.
 
 ## Browser support
 
 Modern Chromium, Firefox, Safari, and Edge. Uses `Intl.NumberFormat`,
-`URL.createObjectURL`, CSS variables, and `backdrop-filter` (with `-webkit-`
-fallback).
-# moneytrack
+`URL.createObjectURL`, CSS variables, `backdrop-filter` (with `-webkit-`
+fallback), and `color-mix()` for theme-aware tints. Light and dark themes are
+driven by a `theme-dark` class on `<html>`, applied before first paint and
+persisted in `localStorage`.

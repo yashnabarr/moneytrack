@@ -127,6 +127,203 @@ function wireThemeToggle(root) {
   );
 }
 
+/* =========================================================
+   TOPBAR SEARCH — autocomplete navigator
+   ========================================================= */
+
+/** Searchable destinations — sidebar nav + a couple of special actions. */
+const SEARCH_ITEMS = [
+  { name: "Dashboard",      sub: "Overview & key stats",            icon: "dashboard",       tab: "dashboard",    aliases: "home main overview stats" },
+  { name: "Transactions",   sub: "Income & expense log",            icon: "swap_horiz",      tab: "transactions", aliases: "tx entries history list payments" },
+  { name: "Budgets",        sub: "Monthly category limits",         icon: "donut_small",     tab: "budgets",      aliases: "limit spending cap" },
+  { name: "Savings Goals",  sub: "Targets & progress rings",        icon: "flag",            tab: "goals",        aliases: "goal target save fund" },
+  { name: "Analytics",      sub: "Charts, trends & breakdowns",     icon: "monitoring",      tab: "analytics",    aliases: "report chart graph insight stat" },
+  { name: "Reports",        sub: "Printable summary",               icon: "description",     tab: "reports",      aliases: "summary print" },
+  { name: "Settings",       sub: "Preferences & data management",   icon: "settings",        tab: "settings",     aliases: "preference config option" },
+  { name: "Help & Support", sub: "FAQs, guides & contact",          icon: "help",            tab: "help",         aliases: "faq question docs guide" },
+  { name: "Profile",        sub: "Your account in Settings",        icon: "person",          tab: "settings",     aliases: "account user me name email" },
+  { name: "Logout",         sub: "Sign out of PockIt",              icon: "logout",          action: "logout",    aliases: "signout exit leave quit" },
+];
+
+/** Score-and-sort matches for a query (max 5). Prefix matches rank above contains; name beats sub/aliases. */
+function searchMatch(query) {
+  const q = (query || "").trim().toLowerCase();
+  if (!q) return [];
+  const scored = SEARCH_ITEMS.map(it => {
+    const name    = it.name.toLowerCase();
+    const sub     = it.sub.toLowerCase();
+    const aliases = (it.aliases || "").toLowerCase();
+    let score = -1;
+    if (name === q)                 score = 100;
+    else if (name.startsWith(q))    score = 90;
+    else if (name.includes(" " + q)) score = 80;        // word-prefix match
+    else if (name.includes(q))      score = 70;
+    else if (aliases.split(/\s+/).some(a => a.startsWith(q))) score = 50;
+    else if (sub.includes(q))       score = 30;
+    else if (aliases.includes(q))   score = 20;
+    return { it, score };
+  });
+  return scored
+    .filter(s => s.score >= 0)
+    .sort((a, b) => b.score - a.score || a.it.name.localeCompare(b.it.name))
+    .slice(0, 5)
+    .map(s => s.it);
+}
+
+/** Escape regex meta-characters so the highlight regex is safe. */
+function escapeRegex(s) { return String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+
+/** Wrap matching substring in <mark> for visible highlight. */
+function highlightMatch(text, q) {
+  const safeText = escapeHtml(text);
+  if (!q) return safeText;
+  const safeQ = escapeHtml(q);
+  return safeText.replace(new RegExp("(" + escapeRegex(safeQ) + ")", "ig"), "<mark>$1</mark>");
+}
+
+/** Render one suggestion row. */
+function searchItemHTML(it, q, isFirst) {
+  return `
+    <div class="search-item ${isFirst ? "highlight" : ""}" role="option" data-search-idx>
+      <span class="si-ic">${icon(it.icon)}</span>
+      <div class="si-main">
+        <div class="si-name">${highlightMatch(it.name, q)}</div>
+        <div class="si-sub">${highlightMatch(it.sub, q)}</div>
+      </div>
+      ${isFirst ? `<span class="si-kbd">↵</span>` : ""}
+    </div>`;
+}
+
+/** Navigate to (or trigger) the selected suggestion. */
+function searchActivate(it) {
+  if (!it) return;
+  if (it.action === "logout") { logout(); return; }
+  if (it.tab) {
+    activeTab = it.tab;
+    txPage = 1;
+    render();
+    window.scrollTo(0, 0);
+  }
+}
+
+/** Wire the topbar autocomplete search. Idempotent per render. */
+function wireTopbarSearch(root) {
+  const wrap     = root.querySelector("#topbarSearch");
+  const input    = root.querySelector("#topbarSearchInput");
+  const dropdown = root.querySelector("#topbarSearchDropdown");
+  const clearBtn = root.querySelector("#topbarSearchClear");
+  if (!wrap || !input || !dropdown) return;
+
+  let highlight = 0;
+  let lastResults = [];
+  let debounceId = null;
+
+  function paint(q) {
+    lastResults = searchMatch(q);
+    if (!q.trim()) {
+      dropdown.hidden = true;
+      input.setAttribute("aria-expanded", "false");
+      return;
+    }
+    if (!lastResults.length) {
+      dropdown.innerHTML = `<div class="search-empty">${icon("search_off")}No results for "<b>${escapeHtml(q)}</b>".</div>`;
+    } else {
+      highlight = 0;
+      dropdown.innerHTML =
+        `<div class="search-hint">Go to</div>` +
+        lastResults.map((it, i) => searchItemHTML(it, q, i === 0)).join("");
+      // Click handlers per row
+      dropdown.querySelectorAll(".search-item").forEach((el, i) => {
+        el.addEventListener("mousedown", e => e.preventDefault()); // keep focus before click
+        el.addEventListener("click", () => {
+          finish();
+          searchActivate(lastResults[i]);
+        });
+        el.addEventListener("mouseenter", () => setHighlight(i));
+      });
+    }
+    dropdown.hidden = false;
+    input.setAttribute("aria-expanded", "true");
+  }
+
+  function setHighlight(idx) {
+    if (!lastResults.length) return;
+    highlight = (idx + lastResults.length) % lastResults.length;
+    dropdown.querySelectorAll(".search-item").forEach((el, i) => {
+      el.classList.toggle("highlight", i === highlight);
+      if (i === highlight) el.scrollIntoView({ block: "nearest" });
+    });
+  }
+
+  function finish() {
+    input.value = "";
+    dropdown.hidden = true;
+    clearBtn.hidden = true;
+    input.setAttribute("aria-expanded", "false");
+  }
+
+  // ---- Input: debounced filter ----
+  input.addEventListener("input", () => {
+    clearBtn.hidden = !input.value;
+    clearTimeout(debounceId);
+    debounceId = setTimeout(() => paint(input.value), 200);
+  });
+
+  // ---- Keyboard nav ----
+  input.addEventListener("keydown", e => {
+    if (e.key === "ArrowDown") { e.preventDefault(); paint(input.value); setHighlight(highlight + 1); }
+    else if (e.key === "ArrowUp")   { e.preventDefault(); setHighlight(highlight - 1); }
+    else if (e.key === "Enter") {
+      if (!dropdown.hidden && lastResults[highlight]) {
+        e.preventDefault();
+        const target = lastResults[highlight];
+        finish();
+        searchActivate(target);
+      }
+    } else if (e.key === "Escape") {
+      if (!dropdown.hidden) { e.preventDefault(); dropdown.hidden = true; input.setAttribute("aria-expanded", "false"); }
+      else if (input.value) { input.value = ""; clearBtn.hidden = true; }
+    }
+  });
+
+  // ---- Re-open dropdown on refocus if there's a query ----
+  input.addEventListener("focus", () => { if (input.value.trim()) paint(input.value); });
+
+  // ---- Clear button ----
+  clearBtn.addEventListener("click", () => {
+    input.value = ""; clearBtn.hidden = true;
+    dropdown.hidden = true; input.focus();
+    input.setAttribute("aria-expanded", "false");
+  });
+
+  // ---- Click outside closes ----
+  // Bound once globally so it survives partial re-renders
+  if (!document.__pockitSearchOutsideBound) {
+    document.__pockitSearchOutsideBound = true;
+    document.addEventListener("click", e => {
+      const w = document.querySelector("#topbarSearch");
+      if (!w) return;
+      if (!w.contains(e.target)) {
+        const dd = document.querySelector("#topbarSearchDropdown");
+        const ip = document.querySelector("#topbarSearchInput");
+        if (dd) dd.hidden = true;
+        if (ip) ip.setAttribute("aria-expanded", "false");
+      }
+    });
+  }
+
+  // ---- Cmd/Ctrl + K focuses search ----
+  if (!document.__pockitSearchHotkeyBound) {
+    document.__pockitSearchHotkeyBound = true;
+    document.addEventListener("keydown", e => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        const ip = document.querySelector("#topbarSearchInput");
+        if (ip) { e.preventDefault(); ip.focus(); ip.select(); }
+      }
+    });
+  }
+}
+
 /** Reveal-on-scroll observer — adds `.is-visible` to any [data-reveal]
  *  / [data-stagger] element when ~15% of it enters the viewport.
  *  Falls back gracefully on browsers without IntersectionObserver. */
@@ -728,6 +925,7 @@ function render() {
   root.querySelectorAll("[data-logout]").forEach(b => b.addEventListener("click", logout));
   wireThemeToggle(root);
   wireDocLinks(root);
+  wireTopbarSearch(root);
 
   // ---- Reports / Settings actions ----
   root.querySelectorAll('[data-action="print"]').forEach(b => b.addEventListener("click", () => window.print()));

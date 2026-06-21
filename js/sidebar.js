@@ -42,7 +42,14 @@ function topbarHTML() {
         <span class="topbar-title">${TAB_TITLES[activeTab] || ""}</span>
       </div>
       <div class="nav-right">
-        <div class="search">${icon("search")}<input type="text" placeholder="Search..." /></div>
+        <div class="search-wrap" id="topbarSearch">
+          <div class="search">
+            ${icon("search")}
+            <input type="text" id="topbarSearchInput" placeholder="Search sections… (try 'budgets')" autocomplete="off" aria-label="Search" aria-haspopup="listbox" aria-expanded="false" aria-controls="topbarSearchDropdown" />
+            <button type="button" class="search-clear" id="topbarSearchClear" title="Clear" aria-label="Clear search" hidden>${icon("close")}</button>
+          </div>
+          <div class="search-dropdown" id="topbarSearchDropdown" role="listbox" hidden></div>
+        </div>
         <button class="icon-btn-lg" data-theme-toggle title="Toggle theme" aria-label="Toggle light/dark theme">${icon(isDarkActive() ? "light_mode" : "dark_mode")}</button>
         <button class="icon-btn-lg" data-doc="help" title="Help">${icon("help")}</button>
       </div>

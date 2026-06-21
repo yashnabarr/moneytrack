@@ -1169,6 +1169,14 @@ if (_oaAt) {
   if (!getCountry()) { onbOpen = true; onbSelected = detectCountry(); }
   render();
 
+  // Pre-warm the serverless backend on landing page load so the first auth call
+  // is fast instead of paying a cold-start (3–6 s) at the moment the user signs in.
+  // Fire-and-forget; failures are silently ignored.
+  if (appScreen === "landing" && window.API_BASE_URL) {
+    fetch(`${window.API_BASE_URL}/api/health`, { method: 'GET', mode: 'cors', cache: 'no-store' })
+      .catch(() => { /* backend asleep or offline — no problem, login will still work */ });
+  }
+
   // If already authenticated, refresh data from server in the background
   if (mmApi.tokenStore.isLoggedIn() && getAuth()) {
     loadFromApi().then(() => render());

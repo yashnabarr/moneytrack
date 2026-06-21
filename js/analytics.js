@@ -49,7 +49,7 @@ function txInPeriod(period) {
 
 /** Income (solid green) vs expenses (red dashed) line chart. */
 function lineChart(data) {
-  const W = 600, H = 240, padL = 44, padR = 16, padT = 16, padB = 28;
+  const W = 640, H = 280, padL = 72, padR = 20, padT = 20, padB = 40;
   const max = Math.max(1, ...data.map(d => Math.max(d.income, d.expense)));
   const n = data.length, plotW = W - padL - padR, plotH = H - padT - padB;
   const x = i => padL + (n > 1 ? i * plotW / (n - 1) : plotW / 2);
@@ -59,14 +59,14 @@ function lineChart(data) {
   let grid = "";
   [0, 0.5, 1].forEach(f => {
     const gy = padT + f * plotH, val = max * (1 - f);
-    grid += `<line x1="${padL}" y1="${gy}" x2="${W - padR}" y2="${gy}" stroke="#dde4dd" stroke-width="1"/>`;
-    grid += `<text x="${padL - 8}" y="${gy + 4}" text-anchor="end" font-size="11" fill="#6c7a71">${moneyShort(val)}</text>`;
+    grid += `<line x1="${padL}" y1="${gy}" x2="${W - padR}" y2="${gy}" stroke="currentColor" stroke-width="1" opacity=".15"/>`;
+    grid += `<text x="${padL - 10}" y="${gy + 4}" text-anchor="end" font-size="11" fill="currentColor" opacity=".7">${moneyShort(val)}</text>`;
   });
-  const xlabels = data.map((d, i) => `<text x="${x(i)}" y="${H - 8}" text-anchor="middle" font-size="11" fill="#6c7a71">${d.label}</text>`).join("");
+  const xlabels = data.map((d, i) => `<text x="${x(i)}" y="${H - 14}" text-anchor="middle" font-size="12" fill="currentColor" opacity=".7">${d.label}</text>`).join("");
   const dots = key => data.map((d, i) => `<circle cx="${x(i)}" cy="${y(d[key])}" r="3.5" fill="${key === "income" ? "#006c49" : "#ba1a1a"}"/>`).join("");
 
   return `
-    <svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">
+    <svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" style="overflow:visible">
       ${grid}
       <polyline points="${pts("income")}"  fill="none" stroke="#006c49" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
       <polyline points="${pts("expense")}" fill="none" stroke="#ba1a1a" stroke-width="2.5" stroke-dasharray="6 5" stroke-linejoin="round" stroke-linecap="round"/>
@@ -81,7 +81,7 @@ function lineChart(data) {
 
 /** Side-by-side bars per month (income vs expense). */
 function barChart(data) {
-  const W = 600, H = 240, padL = 44, padR = 16, padT = 16, padB = 28;
+  const W = 640, H = 280, padL = 72, padR = 20, padT = 20, padB = 40;
   const max = Math.max(1, ...data.map(d => Math.max(d.income, d.expense)));
   const n = data.length, plotW = W - padL - padR, plotH = H - padT - padB;
   const gw = plotW / n, bw = Math.min(22, gw * 0.3);
@@ -90,8 +90,8 @@ function barChart(data) {
   let grid = "";
   [0, 0.5, 1].forEach(f => {
     const gy = padT + f * plotH, val = max * (1 - f);
-    grid += `<line x1="${padL}" y1="${gy}" x2="${W - padR}" y2="${gy}" stroke="#dde4dd" stroke-width="1"/>`;
-    grid += `<text x="${padL - 8}" y="${gy + 4}" text-anchor="end" font-size="11" fill="#6c7a71">${moneyShort(val)}</text>`;
+    grid += `<line x1="${padL}" y1="${gy}" x2="${W - padR}" y2="${gy}" stroke="currentColor" stroke-width="1" opacity=".15"/>`;
+    grid += `<text x="${padL - 10}" y="${gy + 4}" text-anchor="end" font-size="11" fill="currentColor" opacity=".7">${moneyShort(val)}</text>`;
   });
 
   let bars = "";
@@ -100,11 +100,11 @@ function barChart(data) {
     const ih = (d.income / max) * plotH, eh = (d.expense / max) * plotH;
     bars += `<rect x="${cx - bw - 2}" y="${y(d.income)}"  width="${bw}" height="${ih}" rx="3" fill="#006c49"/>`;
     bars += `<rect x="${cx + 2}"      y="${y(d.expense)}" width="${bw}" height="${eh}" rx="3" fill="#ba1a1a"/>`;
-    bars += `<text x="${cx}" y="${H - 8}" text-anchor="middle" font-size="11" fill="#6c7a71">${d.label}</text>`;
+    bars += `<text x="${cx}" y="${H - 14}" text-anchor="middle" font-size="12" fill="currentColor" opacity=".7">${d.label}</text>`;
   });
 
   return `
-    <svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">${grid}${bars}</svg>
+    <svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" style="overflow:visible">${grid}${bars}</svg>
     <div class="chart-legend">
       <span class="legend-item"><span class="legend-dot" style="background:#006c49"></span>Income</span>
       <span class="legend-item"><span class="legend-dot" style="background:#ba1a1a"></span>Expenses</span>
@@ -149,8 +149,8 @@ function donutChart(tx) {
     <div class="donut-wrap">
       <svg class="donut" viewBox="0 0 160 160">
         ${segs}
-        <text class="donut-center" x="80" y="72" font-size="13" fill="#6c7a71">Total</text>
-        <text class="donut-center" x="80" y="92" font-size="17" fill="#161d19">${moneyShort(total)}</text>
+        <text class="donut-center" x="80" y="72" font-size="13" fill="currentColor" opacity=".7">Total</text>
+        <text class="donut-center" x="80" y="92" font-size="17" fill="currentColor">${moneyShort(total)}</text>
       </svg>
       <div class="donut-legend">${legend}</div>
     </div>`;

@@ -61,7 +61,8 @@ function icon(name) { return '<span class="material-symbols-outlined">' + name +
 
 /** Render a country flag as an <img> from flagcdn.com — works on all browsers including Chrome/Brave on Windows. */
 function flagImg(code, size = 24) {
-  return `<img src="https://flagcdn.com/w40/${code.toLowerCase()}.png" width="${size}" height="${Math.round(size * 0.75)}" alt="${code}" style="border-radius:3px;vertical-align:middle;object-fit:cover;flex-shrink:0;">`;
+  const c = (code || "").toLowerCase();
+  return `<img src="https://flagcdn.com/w40/${c}.png" width="${size}" height="${Math.round(size * 0.75)}" alt="${c}" loading="lazy" decoding="async" style="border-radius:3px;vertical-align:middle;object-fit:cover;flex-shrink:0;">`;
 }
 
 /**

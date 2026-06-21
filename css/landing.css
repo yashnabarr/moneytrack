@@ -175,6 +175,25 @@
 .vis-bar-track { height: 8px; border-radius: 9999px; background: var(--container); overflow: hidden; }
 .vis-bar-fill  { height: 100%; border-radius: 9999px; }
 
+/* ===== Section dividers — clean horizontal lines between landing sections ===== */
+.landing > section + section { position: relative; }
+.landing > section + section::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 50%;
+  width: min(1100px, calc(100% - 48px));
+  max-width: calc(100% - 48px);
+  height: 1px;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg,
+    transparent 0%,
+    var(--border-strong) 20%,
+    var(--border-strong) 80%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
 /* ===== Bottom CTA band ===== */
 .cta-section {
   padding: 72px 24px; text-align: center;

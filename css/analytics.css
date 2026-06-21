@@ -28,10 +28,15 @@
 .net-card .net-val { font-size: 34px; font-weight: 700; letter-spacing: -.01em; margin-top: 4px; }
 
 /* ===== Generic chart container ===== */
-svg.chart { width: 100%; height: auto; display: block; }
+svg.chart {
+  width: 100%; height: auto; display: block;
+  min-height: 240px; max-height: 320px;
+  color: var(--on-surface-variant); /* drives axis label color in both themes */
+  overflow: visible;
+}
 .chart-legend {
   display: flex; gap: 18px; flex-wrap: wrap;
-  margin-top: 12px; font-size: 13px; color: var(--on-surface-variant);
+  margin-top: 16px; font-size: 13px; color: var(--on-surface-variant);
 }
 .legend-item { display: flex; align-items: center; gap: 6px; }
 .legend-dot  { width: 11px; height: 11px; border-radius: 9999px; flex-shrink: 0; }
@@ -39,7 +44,7 @@ svg.chart { width: 100%; height: auto; display: block; }
 
 /* ===== Donut chart (Expense Breakdown) ===== */
 .donut-wrap   { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
-.donut        { width: 160px; height: 160px; flex-shrink: 0; }
+.donut        { width: 160px; height: 160px; flex-shrink: 0; color: var(--on-surface); }
 .donut-center { font-weight: 700; text-anchor: middle; dominant-baseline: central; font-family: "Inter", sans-serif; }
 .donut-legend { flex: 1; min-width: 160px; display: flex; flex-direction: column; gap: 10px; }
 .donut-row    { display: flex; align-items: center; justify-content: space-between; font-size: 14px; }

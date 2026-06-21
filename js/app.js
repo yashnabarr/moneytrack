@@ -1137,18 +1137,31 @@ if (_oaAt) {
   // Clean the tokens out of the address bar
   window.history.replaceState({}, '', window.location.pathname);
   mmApi.tokenStore.set(_oaAt, _oaRt);
-  // Fetch the user's profile then hydrate localStorage and enter the app
-  mmApi.get('/api/user/profile').then(async user => {
-    if (user) {
-      setAuth({ name: user.name, email: user.email });
-      await loadFromApi();
-      login({ name: user.name, email: user.email });
-    } else {
+
+  // Render landing immediately so the user is never staring at a blank page
+  // while the profile request is in flight.
+  initializeDefaultData();
+  appScreen = "landing";
+  if (!getCountry()) { onbOpen = true; onbSelected = detectCountry(); }
+  render();
+
+  // Then fetch the profile and switch into the app once it lands.
+  mmApi.get('/api/user/profile')
+    .then(async user => {
+      if (user) {
+        setAuth({ name: user.name, email: user.email });
+        try { await loadFromApi(); } catch (e) { console.error('loadFromApi failed', e); }
+        login({ name: user.name, email: user.email });
+      } else {
+        console.warn('OAuth profile fetch returned no user — token may be invalid.');
+        mmApi.tokenStore.clear();
+      }
+    })
+    .catch(err => {
+      console.error('OAuth boot failed:', err);
       mmApi.tokenStore.clear();
-      appScreen = "landing";
-      render();
-    }
-  });
+      alert('Sign-in completed but loading your profile failed. Please try again. (See console for details.)');
+    });
 } else {
   // Normal boot — render immediately from localStorage cache
   initializeDefaultData();

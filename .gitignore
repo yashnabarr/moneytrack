@@ -1,0 +1,38 @@
+# ===== Secrets — NEVER commit ===============================================
+.env
+.env.local
+.env.*.local
+**/.env
+**/.env.local
+**/.env.*.local
+
+# ===== Dependencies =========================================================
+node_modules/
+**/node_modules/
+
+# ===== Build / cache ========================================================
+dist/
+build/
+.next/
+.vercel/
+.cache/
+**/.vercel/
+
+# ===== Prisma generated client ==============================================
+backend/node_modules/.prisma/
+backend/src/generated/
+
+# ===== Logs =================================================================
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ===== OS / editor cruft ====================================================
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/launch.json
+!.vscode/settings.json
+*.swp

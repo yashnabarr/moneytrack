@@ -33,14 +33,14 @@ function onboardingHTML() {
   const popular = POPULAR_CODES.map(code => COUNTRIES.find(c => c.code === code)).filter(Boolean);
   const popularGrid = popular.map(c => `
     <button class="pop-chip ${sel && sel.code === c.code ? "selected" : ""}" data-pickc="${c.code}">
-      <span class="flag">${c.flag}</span>
+      <span class="flag">${flagImg(c.code, 28)}</span>
       <span class="pop-name">${c.name.split(" ")[0]}</span>
       <span class="pop-curr">${c.symbol} ${c.currency}</span>
     </button>`).join("");
 
   const list = filtered.map(c => `
     <div class="onb-row ${sel && sel.code === c.code ? "selected" : ""}" data-pickc="${c.code}">
-      <span class="flag">${c.flag}</span>
+      <span class="flag">${flagImg(c.code, 24)}</span>
       <span class="row-name">${c.name}</span>
       <span class="row-curr">${c.symbol} ${c.currency}</span>
     </div>`).join("") || `<div class="empty" style="margin:12px">No countries match "${escapeHtml(onbSearch)}"</div>`;
@@ -53,7 +53,7 @@ function onboardingHTML() {
   const isDetected = sel.code === detected.code;
   const detectedRow = isDetected ? "" : `
     <div class="onb-detected">
-      <span class="flag">${detected.flag}</span>
+      <span class="flag">${flagImg(detected.code, 24)}</span>
       <div class="det-info"><b>We detected ${detected.name}</b><span>${detected.symbol} ${detected.currency}</span></div>
       <button data-use-detected>Use this</button>
     </div>`;
@@ -74,7 +74,7 @@ function onboardingHTML() {
           <div class="onb-search">${icon("search")}<input id="onb-q" type="text" placeholder="Search country or currency..." value="${escapeHtml(onbSearch)}" autocomplete="off" /></div>
           <div class="onb-list">${list}</div>
           <div class="preview-card">
-            <span class="flag">${sel.flag}</span>
+            <span class="flag">${flagImg(sel.code, 32)}</span>
             <div class="pv-info">
               <div class="pv-country">${escapeHtml(sel.name)}</div>
               <div class="pv-currency">${escapeHtml(sel.currency)} · ${escapeHtml(sel.symbol)}</div>

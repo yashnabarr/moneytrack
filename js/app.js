@@ -127,6 +127,27 @@ function wireThemeToggle(root) {
   );
 }
 
+/** Reveal-on-scroll observer — adds `.is-visible` to any [data-reveal]
+ *  / [data-stagger] element when ~15% of it enters the viewport.
+ *  Falls back gracefully on browsers without IntersectionObserver. */
+function wireRevealOnScroll(root) {
+  const targets = root.querySelectorAll("[data-reveal], [data-stagger]");
+  if (!targets.length) return;
+  if (typeof IntersectionObserver === "undefined") {
+    targets.forEach(el => el.classList.add("is-visible"));
+    return;
+  }
+  const io = new IntersectionObserver((entries, obs) => {
+    entries.forEach(en => {
+      if (en.isIntersecting) {
+        en.target.classList.add("is-visible");
+        obs.unobserve(en.target);
+      }
+    });
+  }, { threshold: 0.15, rootMargin: "0px 0px -8% 0px" });
+  targets.forEach(el => io.observe(el));
+}
+
 /** Lightweight toast for "saved" feedback. */
 function showToast(msg, ic = "check_circle") {
   document.querySelectorAll(".mm-toast").forEach(t => t.remove());
@@ -609,6 +630,7 @@ function render() {
     root.querySelectorAll("[data-logout]").forEach(b => b.addEventListener("click", logout));
     wireThemeToggle(root);
     wireDocLinks(root);
+    wireRevealOnScroll(root);
     return;
   }
 

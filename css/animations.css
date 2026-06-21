@@ -1,0 +1,90 @@
+/* =====================================================
+   animations.css — scroll-reveal + entrance animations.
+   Activated by the Intersection Observer in js/app.js,
+   which adds `.is-visible` to any element with `data-reveal`.
+   ===================================================== */
+
+/* ===== Default reveal: fade + slide up ===== */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity .65s cubic-bezier(.22,.61,.36,1),
+    transform .75s cubic-bezier(.22,.61,.36,1);
+  will-change: opacity, transform;
+}
+[data-reveal].is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ===== Reveal variants ===== */
+[data-reveal="left"]  { transform: translateX(-40px); }
+[data-reveal="right"] { transform: translateX(40px); }
+[data-reveal="left"].is-visible,
+[data-reveal="right"].is-visible { transform: translateX(0); }
+
+[data-reveal="zoom"] { transform: scale(.92); }
+[data-reveal="zoom"].is-visible { transform: scale(1); }
+
+[data-reveal="fade"] { transform: none; }
+
+/* ===== Staggered children: each direct child reveals 0.08s after the previous ===== */
+[data-stagger] > * {
+  opacity: 0;
+  transform: translateY(22px);
+  transition:
+    opacity .55s cubic-bezier(.22,.61,.36,1),
+    transform .65s cubic-bezier(.22,.61,.36,1);
+}
+[data-stagger].is-visible > *           { opacity: 1; transform: translateY(0); }
+[data-stagger].is-visible > *:nth-child(1) { transition-delay: .00s; }
+[data-stagger].is-visible > *:nth-child(2) { transition-delay: .08s; }
+[data-stagger].is-visible > *:nth-child(3) { transition-delay: .16s; }
+[data-stagger].is-visible > *:nth-child(4) { transition-delay: .24s; }
+[data-stagger].is-visible > *:nth-child(5) { transition-delay: .32s; }
+[data-stagger].is-visible > *:nth-child(6) { transition-delay: .40s; }
+[data-stagger].is-visible > *:nth-child(7) { transition-delay: .48s; }
+[data-stagger].is-visible > *:nth-child(8) { transition-delay: .56s; }
+
+/* ===== Subtle on-load entrance for first hero on landing ===== */
+@keyframes pockit-fade-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.hero h1, .hero .lead, .hero-cta, .hero .badge-pill, .hero .social-proof {
+  animation: pockit-fade-up .7s cubic-bezier(.22,.61,.36,1) both;
+}
+.hero .badge-pill { animation-delay: .05s; }
+.hero h1          { animation-delay: .15s; }
+.hero .lead       { animation-delay: .25s; }
+.hero-cta         { animation-delay: .35s; }
+.hero .social-proof { animation-delay: .45s; }
+.hero-visual .mockup { animation: pockit-fade-up .9s cubic-bezier(.22,.61,.36,1) both .35s; }
+
+/* ===== Card hover lift (shared by Contact / Help cards) ===== */
+.lift-on-hover { transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease; }
+.lift-on-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(0,0,0,.10);
+  border-color: var(--primary);
+}
+
+/* ===== Respect reduced motion ===== */
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal],
+  [data-stagger] > * {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+    animation: none !important;
+  }
+  .hero h1, .hero .lead, .hero-cta, .hero .badge-pill,
+  .hero .social-proof, .hero-visual .mockup {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .lift-on-hover { transition: none !important; }
+  .lift-on-hover:hover { transform: none !important; }
+}

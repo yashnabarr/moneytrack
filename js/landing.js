@@ -79,20 +79,20 @@ function landingHTML() {
         </div>
       </section>
 
-      <section class="features" id="features">
+      <section class="features" id="features" data-reveal>
         <div class="features-inner">
           <h2>Unrivaled Financial Clarity</h2>
           <p class="sub">Everything you need to manage your wealth, organized beautifully.</p>
-          <div class="feature-grid">
-            <div class="feature-card">
+          <div class="feature-grid" data-stagger>
+            <div class="feature-card lift-on-hover">
               <div class="feature-icon" style="background:rgba(16,185,129,.18);color:var(--primary)">${icon("receipt_long")}</div>
               <h3>Expense Tracking</h3><p>Record and categorize your spending with clarity and precision.</p>
             </div>
-            <div class="feature-card">
+            <div class="feature-card lift-on-hover">
               <div class="feature-icon" style="background:rgba(113,161,255,.22);color:var(--tertiary)">${icon("account_balance_wallet")}</div>
               <h3>Income Management</h3><p>Track multiple revenue streams and watch your balance grow.</p>
             </div>
-            <div class="feature-card">
+            <div class="feature-card lift-on-hover">
               <div class="feature-icon" style="background:rgba(0,108,73,.1);color:var(--primary)">${icon("pie_chart")}</div>
               <h3>Smart Budgets</h3><p>Set limits per category and stay on top of your spending habits.</p>
             </div>
@@ -100,18 +100,18 @@ function landingHTML() {
         </div>
       </section>
 
-      <section class="awards">
-        <div class="awards-inner">
+      <section class="awards" data-reveal>
+        <div class="awards-inner" data-stagger>
           <div class="award">${icon("workspace_premium")}<h4>4.8 / 5 user rating</h4><p>Across 10,000+ active users.</p></div>
           <div class="award">${icon("verified")}<h4>Bank-grade privacy</h4><p>Your data stays in your browser. Always.</p></div>
           <div class="award">${icon("emoji_events")}<h4>Built for clarity</h4><p>Designed by financial UX experts.</p></div>
         </div>
       </section>
 
-      <section class="luv">
+      <section class="luv" data-reveal>
         <div class="luv-inner">
           <h2><span class="accent">Features</span> our users love</h2>
-          <div class="luv-grid">
+          <div class="luv-grid" data-stagger>
             <div class="luv-item">
               <div class="luv-circle" style="background:#10b981">${icon("account_balance_wallet")}</div>
               <h3>Multiple wallets</h3>
@@ -146,11 +146,11 @@ function landingHTML() {
         </div>
       </section>
 
-      <section class="steps">
+      <section class="steps" data-reveal>
         <div class="steps-inner">
           <h2>How to get your money <span class="accent">into shape?</span></h2>
 
-          <div class="step">
+          <div class="step" data-reveal>
             <div class="step-num">1</div>
             <div class="step-text">
               <div class="step-label">STEP 1</div>
@@ -168,7 +168,7 @@ function landingHTML() {
             </div>
           </div>
 
-          <div class="step reverse">
+          <div class="step reverse" data-reveal>
             <div class="step-num">2</div>
             <div class="step-visual">
               <div class="vis-card" style="flex-direction:column;align-items:stretch;gap:8px">
@@ -189,7 +189,7 @@ function landingHTML() {
             </div>
           </div>
 
-          <div class="step">
+          <div class="step" data-reveal>
             <div class="step-num">3</div>
             <div class="step-text">
               <div class="step-label">STEP 3</div>
@@ -209,7 +209,7 @@ function landingHTML() {
         </div>
       </section>
 
-      <section class="cta-section">
+      <section class="cta-section" data-reveal="zoom">
         <h2>Start Managing Your Money Smarter Today</h2>
         <p>Join thousands of professionals who have taken control of their financial destiny.</p>
         <div class="cta-btns">

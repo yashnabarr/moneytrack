@@ -10,6 +10,7 @@ const KEYS = {
   budgets:      "mt_budgets",
   goals:        "mt_goals",
   recurring:    "mt_recurring",   // Phase 1: recurring transactions
+  splits:       "mt_splits",      // Phase 2: split expense tracker
   auth:         "mt_auth",
   country:      "mt_country",
 };
@@ -59,6 +60,7 @@ const NAV = [
   { id: "dashboard",    label: "Dashboard",     icon: "dashboard" },
   { id: "transactions", label: "Transactions",  icon: "swap_horiz" },
   { id: "recurring",    label: "Recurring",      icon: "autorenew" },
+  { id: "splits",       label: "Splits",          icon: "group" },
   { id: "budgets",      label: "Budgets",        icon: "donut_small" },
   { id: "goals",        label: "Savings Goals",  icon: "flag" },
   { id: "analytics",    label: "Analytics",      icon: "monitoring" },
@@ -70,7 +72,8 @@ const NAV = [
 /** Page titles shown in the top bar */
 const TAB_TITLES = {
   dashboard: "Dashboard", transactions: "Transactions", recurring: "Recurring",
-  budgets: "Budgets", goals: "Savings Goals", analytics: "Analytics", reports: "Reports",
+  splits: "Split Expenses", budgets: "Budgets", goals: "Savings Goals",
+  analytics: "Analytics", reports: "Reports",
   settings: "Settings", help: "Help & Support",
 };
 

@@ -112,8 +112,72 @@ function formatMonth(d) {
   return "Target: " + dt.toLocaleDateString("en-US", { month: "short", year: "numeric" });
 }
 
-/** Today's date as ISO YYYY-MM-DD. */
-function todayStr() { return new Date().toISOString().slice(0, 10); }
+/** Today's date as ISO YYYY-MM-DD (local timezone). */
+function todayStr() {
+  const d = new Date();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${m}-${day}`;
+}
+
+/** ISO date string to Date in local timezone (no UTC drift). */
+function isoToDate(iso) {
+  return iso ? new Date(iso + "T00:00:00") : null;
+}
+
+/** Convert a Date to ISO YYYY-MM-DD in local timezone. */
+function dateToIso(d) {
+  if (!d || isNaN(d)) return "";
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${m}-${day}`;
+}
+
+/** Add `n` days to an ISO date and return a new ISO date. */
+function addDays(iso, n) {
+  const d = isoToDate(iso);
+  if (!d) return iso;
+  d.setDate(d.getDate() + n);
+  return dateToIso(d);
+}
+
+/** Add `n` months to an ISO date. Clamps day-of-month for short target months
+ *  (e.g. Jan 31 + 1 month → Feb 28/29). */
+function addMonths(iso, n) {
+  const d = isoToDate(iso);
+  if (!d) return iso;
+  const day = d.getDate();
+  d.setDate(1);
+  d.setMonth(d.getMonth() + n);
+  const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+  d.setDate(Math.min(day, lastDay));
+  return dateToIso(d);
+}
+
+/** Add `n` years to an ISO date. */
+function addYears(iso, n) {
+  const d = isoToDate(iso);
+  if (!d) return iso;
+  d.setFullYear(d.getFullYear() + n);
+  return dateToIso(d);
+}
+
+/** Whole days between two ISO dates (b - a). Negative if b is earlier. */
+function daysBetween(a, b) {
+  const da = isoToDate(a), db = isoToDate(b);
+  if (!da || !db) return 0;
+  return Math.round((db - da) / 86400000);
+}
+
+/** Friendly relative day label: "Today", "Tomorrow", "in 3 days", "2 days ago". */
+function friendlyDay(iso) {
+  const n = daysBetween(todayStr(), iso);
+  if (n === 0)  return "Today";
+  if (n === 1)  return "Tomorrow";
+  if (n === -1) return "Yesterday";
+  if (n > 1)    return `in ${n} days`;
+  return `${Math.abs(n)} days ago`;
+}
 
 /* ===== SVG: circular progress ring (used by goal cards) ===== */
 

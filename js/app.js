@@ -135,6 +135,7 @@ function wireThemeToggle(root) {
 const SEARCH_ITEMS = [
   { name: "Dashboard",      sub: "Overview & key stats",            icon: "dashboard",       tab: "dashboard",    aliases: "home main overview stats" },
   { name: "Transactions",   sub: "Income & expense log",            icon: "swap_horiz",      tab: "transactions", aliases: "tx entries history list payments" },
+  { name: "Recurring",      sub: "Auto-add subscriptions & salary", icon: "autorenew",       tab: "recurring",    aliases: "subscription rent netflix bill repeat schedule auto" },
   { name: "Budgets",        sub: "Monthly category limits",         icon: "donut_small",     tab: "budgets",      aliases: "limit spending cap" },
   { name: "Savings Goals",  sub: "Targets & progress rings",        icon: "flag",            tab: "goals",        aliases: "goal target save fund" },
   { name: "Analytics",      sub: "Charts, trends & breakdowns",     icon: "monitoring",      tab: "analytics",    aliases: "report chart graph insight stat" },
@@ -749,6 +750,7 @@ function contentHTML() {
   switch (activeTab) {
     case "dashboard":    return dashboardHTML();
     case "transactions": return transactionsHTML();
+    case "recurring":    return recurringHTML();
     case "budgets":      return budgetsHTML();
     case "goals":        return goalsHTML();
     case "analytics":    return analyticsHTML();
@@ -764,9 +766,10 @@ function contentHTML() {
    ========================================================= */
 
 function modalHTML() {
-  if (modalKind === "budget") return budgetModalHTML();
-  if (modalKind === "goal")   return goalModalHTML();
-  if (modalKind === "funds")  return fundsModalHTML();
+  if (modalKind === "budget")    return budgetModalHTML();
+  if (modalKind === "goal")      return goalModalHTML();
+  if (modalKind === "funds")     return fundsModalHTML();
+  if (modalKind === "recurring") return recurringModalHTML();
   return txModalHTML();
 }
 
@@ -789,6 +792,10 @@ function readForm() {
   }
   if (modalKind === "funds") {
     if (g("f-famount")) form.amount = g("f-famount").value;
+    return;
+  }
+  if (modalKind === "recurring") {
+    readRecurringForm();
     return;
   }
   // tx (default)
@@ -1061,6 +1068,29 @@ function render() {
     b.addEventListener("click", e => { e.stopPropagation(); deleteTx(b.getAttribute("data-del")); })
   );
 
+  // ---- Recurring actions ----
+  root.querySelectorAll('[data-action="add-recurring"]').forEach(b =>
+    b.addEventListener("click", () => openRecurringModal(null))
+  );
+  root.querySelectorAll("[data-rec-edit]").forEach(b =>
+    b.addEventListener("click", () => openRecurringModal(b.getAttribute("data-rec-edit")))
+  );
+  root.querySelectorAll("[data-rec-del]").forEach(b =>
+    b.addEventListener("click", () => {
+      const id = b.getAttribute("data-rec-del");
+      if (!confirm("Delete this recurring transaction? Already-created entries are kept.")) return;
+      deleteRecurring(id);
+      showToast("Recurring transaction deleted");
+      render();
+    })
+  );
+  root.querySelectorAll("[data-rec-toggle]").forEach(b =>
+    b.addEventListener("click", () => {
+      pauseRecurring(b.getAttribute("data-rec-toggle"));
+      render();
+    })
+  );
+
   // ---- Pagination ----
   root.querySelectorAll("[data-page]").forEach(b =>
     b.addEventListener("click", () => { txPage = Number(b.getAttribute("data-page")); render(); window.scrollTo(0, 0); })
@@ -1091,7 +1121,7 @@ function render() {
       node.addEventListener("input", () => readForm())
     );
 
-    const saver = { tx: saveTx, budget: saveBudget, goal: saveGoal, funds: addFunds }[modalKind];
+    const saver = { tx: saveTx, budget: saveBudget, goal: saveGoal, funds: addFunds, recurring: saveRecurring }[modalKind];
     root.querySelectorAll("[data-save]").forEach(b => b.addEventListener("click", saver));
   }
 
@@ -1151,7 +1181,9 @@ if (_oaAt) {
       if (user) {
         setAuth({ name: user.name, email: user.email });
         try { await loadFromApi(); } catch (e) { console.error('loadFromApi failed', e); }
+        const created = processRecurring();
         login({ name: user.name, email: user.email });
+        if (created) setTimeout(() => showToast(`${created} recurring transaction${created === 1 ? "" : "s"} auto-added`), 600);
       } else {
         console.warn('OAuth profile fetch returned no user — token may be invalid.');
         mmApi.tokenStore.clear();
@@ -1167,6 +1199,15 @@ if (_oaAt) {
   initializeDefaultData();
   appScreen = getAuth() ? "app" : "landing";
   if (!getCountry()) { onbOpen = true; onbSelected = detectCountry(); }
+
+  // Catch up any due recurring transactions before first render
+  if (getAuth()) {
+    const created = processRecurring();
+    if (created) {
+      // Defer toast so the dashboard is already on screen
+      setTimeout(() => showToast(`${created} recurring transaction${created === 1 ? "" : "s"} auto-added`), 600);
+    }
+  }
   render();
 
   // Pre-warm the serverless backend on landing page load so the first auth call

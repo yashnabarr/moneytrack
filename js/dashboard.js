@@ -88,17 +88,18 @@ function dashboardHTML() {
     <div class="bento">
       <div class="col">
         <div class="card">
-          <div class="card-head"><h3>Recent Transactions</h3><button class="link-btn" data-tab="transactions">View All</button></div>
+          <div class="card-head"><h3>Recent Transactions</h3><button class="link-btn" data-nav="transactions">View All</button></div>
           ${recentHTML}
         </div>
         <div class="card">
-          <div class="card-head"><h3>Savings Goals</h3><button class="link-btn" data-tab="goals">View All</button></div>
+          <div class="card-head"><h3>Savings Goals</h3><button class="link-btn" data-nav="goals">View All</button></div>
           ${goalsHTML}
         </div>
       </div>
       <div class="col">
+        ${recurringDashboardHTML()}
         <div class="card">
-          <div class="card-head"><h3>Budgets</h3><button class="link-btn" data-tab="budgets">View All</button></div>
+          <div class="card-head"><h3>Budgets</h3><button class="link-btn" data-nav="budgets">View All</button></div>
           ${budgetsHTML}
         </div>
       </div>

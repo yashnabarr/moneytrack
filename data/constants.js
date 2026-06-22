@@ -9,9 +9,18 @@ const KEYS = {
   transactions: "mt_transactions",
   budgets:      "mt_budgets",
   goals:        "mt_goals",
+  recurring:    "mt_recurring",   // Phase 1: recurring transactions
   auth:         "mt_auth",
   country:      "mt_country",
 };
+
+/** Recurring-transaction frequencies. */
+const RECURRING_FREQS = [
+  { v: "daily",   l: "Daily",   icon: "today",          adv: { unit: "day",   n: 1 } },
+  { v: "weekly",  l: "Weekly",  icon: "view_week",      adv: { unit: "day",   n: 7 } },
+  { v: "monthly", l: "Monthly", icon: "calendar_month", adv: { unit: "month", n: 1 } },
+  { v: "yearly",  l: "Yearly",  icon: "event_repeat",   adv: { unit: "year",  n: 1 } },
+];
 
 /** Transaction categories grouped by type */
 const CATEGORIES = {
@@ -49,6 +58,7 @@ const GOAL_ICONS = [
 const NAV = [
   { id: "dashboard",    label: "Dashboard",     icon: "dashboard" },
   { id: "transactions", label: "Transactions",  icon: "swap_horiz" },
+  { id: "recurring",    label: "Recurring",      icon: "autorenew" },
   { id: "budgets",      label: "Budgets",        icon: "donut_small" },
   { id: "goals",        label: "Savings Goals",  icon: "flag" },
   { id: "analytics",    label: "Analytics",      icon: "monitoring" },
@@ -59,9 +69,9 @@ const NAV = [
 
 /** Page titles shown in the top bar */
 const TAB_TITLES = {
-  dashboard: "Dashboard", transactions: "Transactions", budgets: "Budgets",
-  goals: "Savings Goals", analytics: "Analytics", reports: "Reports", settings: "Settings",
-  help: "Help & Support",
+  dashboard: "Dashboard", transactions: "Transactions", recurring: "Recurring",
+  budgets: "Budgets", goals: "Savings Goals", analytics: "Analytics", reports: "Reports",
+  settings: "Settings", help: "Help & Support",
 };
 
 /** Donut/bar/line chart color palette */

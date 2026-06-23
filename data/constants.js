@@ -59,6 +59,7 @@ const GOAL_ICONS = [
 const NAV = [
   { id: "dashboard",    label: "Dashboard",     icon: "dashboard" },
   { id: "transactions", label: "Transactions",  icon: "swap_horiz" },
+  { id: "calendar",     label: "Calendar",        icon: "calendar_month" },
   { id: "recurring",    label: "Recurring",      icon: "autorenew" },
   { id: "splits",       label: "Splits",          icon: "group" },
   { id: "budgets",      label: "Budgets",        icon: "donut_small" },
@@ -71,9 +72,9 @@ const NAV = [
 
 /** Page titles shown in the top bar */
 const TAB_TITLES = {
-  dashboard: "Dashboard", transactions: "Transactions", recurring: "Recurring",
-  splits: "Split Expenses", budgets: "Budgets", goals: "Savings Goals",
-  analytics: "Analytics", reports: "Reports",
+  dashboard: "Dashboard", transactions: "Transactions", calendar: "Calendar",
+  recurring: "Recurring", splits: "Split Expenses", budgets: "Budgets",
+  goals: "Savings Goals", analytics: "Analytics", reports: "Reports",
   settings: "Settings", help: "Help & Support",
 };
 

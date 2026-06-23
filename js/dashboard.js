@@ -97,6 +97,7 @@ function dashboardHTML() {
         </div>
       </div>
       <div class="col">
+        ${calendarMiniHTML()}
         ${recurringDashboardHTML()}
         ${splitsDashboardHTML()}
         <div class="card">

@@ -32,6 +32,11 @@ let focusSearch = false;            // restore search-input focus after re-rende
 /* ----- Analytics ----- */
 let anPeriod = "month";             // "month" | "3m" | "year" | "all"
 
+/* ----- Calendar ----- */
+let calYear         = new Date().getFullYear();
+let calMonth        = new Date().getMonth();         // 0–11
+let calSelectedDate = null;                          // "YYYY-MM-DD" or null = today
+
 /* ----- Help & Support ----- */
 let helpSearch      = "";           // FAQ search query
 let helpFocusSearch = false;        // restore focus after re-render

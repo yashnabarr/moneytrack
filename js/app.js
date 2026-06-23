@@ -135,6 +135,7 @@ function wireThemeToggle(root) {
 const SEARCH_ITEMS = [
   { name: "Dashboard",      sub: "Overview & key stats",            icon: "dashboard",       tab: "dashboard",    aliases: "home main overview stats" },
   { name: "Transactions",   sub: "Income & expense log",            icon: "swap_horiz",      tab: "transactions", aliases: "tx entries history list payments" },
+  { name: "Calendar",       sub: "Spending by day, month view",     icon: "calendar_month",  tab: "calendar",     aliases: "month day date schedule view grid" },
   { name: "Recurring",      sub: "Auto-add subscriptions & salary", icon: "autorenew",       tab: "recurring",    aliases: "subscription rent netflix bill repeat schedule auto" },
   { name: "Splits",         sub: "Track shared expenses",            icon: "group",          tab: "splits",       aliases: "split owe owed roommate friend trip settle group" },
   { name: "Budgets",        sub: "Monthly category limits",         icon: "donut_small",     tab: "budgets",      aliases: "limit spending cap" },
@@ -751,6 +752,7 @@ function contentHTML() {
   switch (activeTab) {
     case "dashboard":    return dashboardHTML();
     case "transactions": return transactionsHTML();
+    case "calendar":     return calendarHTML();
     case "recurring":    return recurringHTML();
     case "splits":       return splitsHTML();
     case "budgets":      return budgetsHTML();
@@ -1132,6 +1134,42 @@ function render() {
       render();
     })
   );
+
+  // ---- Calendar actions ----
+  root.querySelectorAll("[data-cal-prev]").forEach(b => b.addEventListener("click", calPrevMonth));
+  root.querySelectorAll("[data-cal-next]").forEach(b => b.addEventListener("click", calNextMonth));
+  root.querySelectorAll("[data-cal-today]").forEach(b => b.addEventListener("click", calGotoToday));
+  root.querySelectorAll("[data-cal-cell]").forEach(b =>
+    b.addEventListener("click", () => {
+      calSelectedDate = b.getAttribute("data-cal-cell");
+      render();
+    })
+  );
+  root.querySelectorAll("[data-cal-quickadd]").forEach(b =>
+    b.addEventListener("click", () => openTxForDate(b.getAttribute("data-cal-quickadd")))
+  );
+  root.querySelectorAll("[data-cal-mini]").forEach(b =>
+    b.addEventListener("click", () => {
+      // Clicking a mini cell jumps to the calendar page with that date selected
+      calSelectedDate = b.getAttribute("data-cal-mini");
+      const d = isoToDate(calSelectedDate);
+      if (d) { calYear = d.getFullYear(); calMonth = d.getMonth(); }
+      activeTab = "calendar";
+      render(); window.scrollTo(0, 0);
+    })
+  );
+
+  // ---- Calendar keyboard nav ----
+  if (activeTab === "calendar" && !root.__calKeysBound) {
+    root.__calKeysBound = true;
+    document.addEventListener("keydown", e => {
+      if (activeTab !== "calendar" || modalOpen) return;
+      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+      if (e.key === "ArrowLeft")  { e.preventDefault(); calPrevMonth(); }
+      else if (e.key === "ArrowRight") { e.preventDefault(); calNextMonth(); }
+      else if (e.key.toLowerCase() === "t") { e.preventDefault(); calGotoToday(); }
+    });
+  }
   // Modal-internal interactions (paidBy toggle, splitType, add/remove people)
   if (modalOpen && modalKind === "split") {
     root.querySelectorAll("[data-sp-paidby]").forEach(b =>

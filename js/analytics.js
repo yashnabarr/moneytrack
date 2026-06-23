@@ -15,20 +15,23 @@ function lastMonths(n) {
   return arr;
 }
 
-/** Compute total income & expense for each of the last `n` months. */
+/** Compute total income & expense for each of the last `n` months.
+ *  Single-pass: bucket all transactions by year-month once, then look up. */
 function monthlyTotals(n) {
   const tx = storage.get(KEYS.transactions, []);
+  const buckets = new Map();   // key "YYYY-M" → { income, expense }
+  tx.forEach(t => {
+    const d = isoToDate(t.date || "");
+    if (!d || isNaN(d)) return;
+    const k = `${d.getFullYear()}-${d.getMonth()}`;
+    const b = buckets.get(k) || { income: 0, expense: 0 };
+    if (t.type === "income") b.income  += Number(t.amount || 0);
+    else                     b.expense += Number(t.amount || 0);
+    buckets.set(k, b);
+  });
   return lastMonths(n).map(mo => {
-    let income = 0, expense = 0;
-    tx.forEach(t => {
-      const d = new Date((t.date || "") + "T00:00:00");
-      if (isNaN(d)) return;
-      if (d.getFullYear() === mo.y && d.getMonth() === mo.m) {
-        if (t.type === "income") income += Number(t.amount || 0);
-        else                     expense += Number(t.amount || 0);
-      }
-    });
-    return { label: mo.label, income, expense };
+    const b = buckets.get(`${mo.y}-${mo.m}`) || { income: 0, expense: 0 };
+    return { label: mo.label, income: b.income, expense: b.expense };
   });
 }
 
@@ -243,11 +246,18 @@ function exportCSV() {
   const tx = storage.get(KEYS.transactions, []);
   if (!tx.length) { alert("No transactions to export."); return; }
 
+  // CSV-injection safe: if a cell starts with =, +, -, @, tab, or CR, prefix with a single quote
+  // so spreadsheet apps treat it as text instead of executing it as a formula.
+  function csvSafe(v) {
+    const s = String(v == null ? "" : v);
+    return /^[=+\-@\t\r]/.test(s) ? "'" + s : s;
+  }
+
   const rows = [["Date", "Type", "Title", "Category", "Amount", "Payment", "Description"]];
   tx.slice().sort((a, b) => (a.date || "").localeCompare(b.date || ""))
     .forEach(t => rows.push([t.date, t.type, t.title, t.category, t.amount, t.payment || "", (t.description || "").replace(/\s+/g, " ")]));
 
-  const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
+  const csv = rows.map(r => r.map(c => `"${csvSafe(c).replace(/"/g, '""')}"`).join(",")).join("\n");
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");

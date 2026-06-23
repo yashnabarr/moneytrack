@@ -62,7 +62,7 @@ function processRecurring() {
     while (due && due <= today) {
       if (r.endDate && due > r.endDate) break;
       txs.push({
-        id:          Date.now().toString(36) + Math.random().toString(36).slice(2, 7) + "_r",
+        id:          newId(),
         type:        r.type,
         title:       r.title,
         amount:      Number(r.amount) || 0,
@@ -100,7 +100,7 @@ function addRecurring(data) {
   const recs = storage.get(KEYS.recurring, []);
   const start = data.startDate || todayStr();
   const rec = {
-    id:            Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+    id:            newId(),
     title:         (data.title || "").trim(),
     amount:        Number(data.amount) || 0,
     type:          data.type === "income" ? "income" : "expense",
@@ -230,7 +230,7 @@ function recurringHTML() {
     <div class="rec-section-title">${icon("autorenew")} Active <span class="rec-count">${active.length}</span></div>
     <div class="rec-grid">${active.map(recurringCardHTML).join("")}</div>
   ` : `
-    <div class="rec-section-title">${icon("autorenew")} Active <span class="rec-count">0</span></div>
+    <div class="rec-section-title">${icon("autorenew")} Active</div>
     <div class="empty">No active recurring transactions.</div>
   `;
 

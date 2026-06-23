@@ -128,7 +128,7 @@ function saveGoal() {
     if (i !== -1) list[i] = { ...list[i], name: form.name.trim(), icon: form.icon, target: Number(form.target), saved, date: form.date, color: form.color };
   } else {
     list.push({
-      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+      id: newId(),
       name: form.name.trim(), icon: form.icon, target: Number(form.target), saved,
       date: form.date, color: form.color,
     });
@@ -184,8 +184,11 @@ function addFunds() {
   const list = storage.get(KEYS.goals, []);
   const i = list.findIndex(x => x.id === editingId);
   if (i !== -1) {
-    list[i].saved = Number(list[i].saved || 0) + Number(form.amount);
+    const target = Number(list[i].target || 0);
+    const newSaved = Number(list[i].saved || 0) + Number(form.amount);
+    list[i].saved = target > 0 ? Math.min(target, newSaved) : newSaved;
     storage.save(KEYS.goals, list);
+    if (newSaved > target && target > 0) showToast("Goal reached — capped at target");
   }
   closeModal();
 }

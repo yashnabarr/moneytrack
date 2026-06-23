@@ -1,7 +1,8 @@
 /**
- * Authentication: storage, helpers, screen builder.
- * Note: this is local-only auth (no backend). Sign-in just persists a name+email
- * to localStorage so the UI can tailor the experience.
+ * Authentication: storage, helpers, screens, login/logout.
+ * Talks to the PockIt backend (email/password + Google OAuth) via js/api.js.
+ * Guest mode is offline-only — auth is stored as { name, email, guest? } in
+ * localStorage[KEYS.auth].
  */
 
 /* ===== Auth state in storage ===== */
@@ -71,17 +72,15 @@ function authHTML() {
             <input id="a-pass" type="${showPassword ? "text" : "password"}" placeholder="Password" />
             <button type="button" class="pw-toggle" data-pwtoggle>${icon(showPassword ? "visibility_off" : "visibility")}</button>
           </div>
-          ${!isSignup ? `
-          <div class="auth-row">
-            <label><input type="checkbox" /> Remember me</label>
-            <a href="#" data-doc="help">Forgot Password?</a>
-          </div>` : `<div style="height:8px"></div>`}
+          ${isSignup ? `
+          <div class="auth-hint">${icon("info")} Use at least 8 characters.</div>
+          ` : `<div style="height:8px"></div>`}
           <button type="submit" class="btn-auth">${isSignup ? "Create Account" : "Sign In"}</button>
         </form>
         <button class="auth-guest" data-guest>Continue as Guest</button>
         <div class="auth-divider">OR CONTINUE WITH</div>
         <button class="btn-social" data-social="Google">${icon("g_translate")} Continue with Google</button>
-        <button class="btn-social github" data-social="GitHub">${icon("code")} Continue with GitHub</button>
+        <button class="btn-social github" disabled title="Coming soon">${icon("code")} GitHub <span class="auth-soon">soon</span></button>
       </div>
     </div>`;
 }

@@ -710,8 +710,11 @@ function downloadBackup() {
   const a    = document.createElement("a");
   a.href = url; a.download = `pockit-backup-${todayStr()}.json`;
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  showToast("Backup downloaded", "save");
+  // Slight delay so the toast follows the file-save dialog, not before it
+  setTimeout(() => {
+    URL.revokeObjectURL(url);
+    showToast("Backup downloaded", "save");
+  }, 100);
 }
 
 /** Restore data from a JSON backup file (replaces current data after confirm). */
@@ -881,12 +884,11 @@ function render() {
     );
     root.querySelectorAll("[data-social]").forEach(b =>
       b.addEventListener("click", () => {
+        if (b.disabled) return;
         const provider = b.getAttribute("data-social");
         if (provider === "Google") {
           // Redirect browser to the backend OAuth entry point
           window.location.href = `${window.API_BASE_URL}/api/auth/google`;
-        } else {
-          alert(`${provider} login is not yet set up.`);
         }
       })
     );
@@ -962,13 +964,18 @@ function render() {
   // ---- Reports / Settings actions ----
   root.querySelectorAll('[data-action="print"]').forEach(b => b.addEventListener("click", () => window.print()));
   root.querySelectorAll('[data-action="clear-data"]').forEach(b =>
-    b.addEventListener("click", () => {
+    b.addEventListener("click", async () => {
       if (!confirm("This will permanently delete ALL your transactions, budgets, goals, recurring and splits. Continue?")) return;
-      storage.save(KEYS.transactions, []);
-      storage.save(KEYS.budgets, []);
-      storage.save(KEYS.goals, []);
-      storage.save(KEYS.recurring, []);
-      storage.save(KEYS.splits, []);
+      // If signed in, wipe the server side in one round trip first.
+      // (Recurring + splits are local-only, so they stay client-side.)
+      if (mmApi.tokenStore.isLoggedIn()) {
+        try { await mmApi.del('/api/user/data'); }
+        catch (e) { console.error('Server clear failed', e); }
+      }
+      // Then wipe localStorage WITHOUT triggering per-item diff sync
+      [KEYS.transactions, KEYS.budgets, KEYS.goals, KEYS.recurring, KEYS.splits].forEach(k =>
+        localStorage.setItem(k, JSON.stringify([]))
+      );
       showToast("All data cleared");
       render();
     })
@@ -1033,14 +1040,6 @@ function render() {
   root.querySelectorAll("[data-nav-help]").forEach(b =>
     b.addEventListener("click", () => {
       activeTab = b.getAttribute("data-nav-help"); txPage = 1;
-      render(); window.scrollTo(0, 0);
-    })
-  );
-
-  // ---- Dashboard "View All" links ----
-  root.querySelectorAll("[data-tab]").forEach(b =>
-    b.addEventListener("click", () => {
-      activeTab = b.getAttribute("data-tab"); txPage = 1;
       render(); window.scrollTo(0, 0);
     })
   );
@@ -1162,7 +1161,21 @@ function render() {
   root.querySelectorAll("[data-cal-today]").forEach(b => b.addEventListener("click", calGotoToday));
   root.querySelectorAll("[data-cal-cell]").forEach(b =>
     b.addEventListener("click", () => {
-      calSelectedDate = b.getAttribute("data-cal-cell");
+      const iso = b.getAttribute("data-cal-cell");
+      calSelectedDate = iso;
+      // If user clicked a previous/next month cell at the grid edges,
+      // navigate to that month so the selection is actually visible.
+      const d = isoToDate(iso);
+      if (d && (d.getFullYear() !== calYear || d.getMonth() !== calMonth)) {
+        // Respect the +3 month cap on forward navigation
+        const today = new Date();
+        const maxDate = new Date(today.getFullYear(), today.getMonth() + CAL_MAX_FUTURE_MONTHS, 1);
+        const target  = new Date(d.getFullYear(), d.getMonth(), 1);
+        if (target <= maxDate) {
+          calYear  = d.getFullYear();
+          calMonth = d.getMonth();
+        }
+      }
       render();
     })
   );
@@ -1204,7 +1217,15 @@ function render() {
     root.querySelectorAll("[data-sp-stype]").forEach(b =>
       b.addEventListener("click", () => {
         readSplitForm();
-        form.splitType = b.getAttribute("data-sp-stype");
+        const next = b.getAttribute("data-sp-stype");
+        // Warn before discarding custom amounts when switching back to Equal
+        if (form.splitType === "custom" && next === "equal") {
+          const hasCustomValues = form.participants.some(p => Number(p.share) > 0);
+          if (hasCustomValues && !confirm("Switching to Equal will reset the custom amounts you've entered. Continue?")) {
+            return;
+          }
+        }
+        form.splitType = next;
         render();
       })
     );
@@ -1232,6 +1253,23 @@ function render() {
     if (addInput) addInput.addEventListener("keydown", e => {
       if (e.key === "Enter") { e.preventDefault(); addParticipant(); }
     });
+  }
+
+  // ---- Recurring modal interaction: "No end date" checkbox toggles date input ----
+  if (modalOpen && modalKind === "recurring") {
+    const noEndBox = root.querySelector("#f-noEnd");
+    const endInput = root.querySelector("#f-endDate");
+    if (noEndBox && endInput) {
+      noEndBox.addEventListener("change", () => {
+        endInput.disabled = noEndBox.checked;
+        if (noEndBox.checked) {
+          endInput.value = "";
+          form.endDate = "";
+        } else {
+          endInput.focus();
+        }
+      });
+    }
 
     // ---- Focus management after render ----
     // Case 1: a person was just added → focus their amount (custom) or refocus name input (equal)
@@ -1332,12 +1370,17 @@ if (_oaAt) {
   window.history.replaceState({}, '', window.location.pathname);
   mmApi.tokenStore.set(_oaAt, _oaRt);
 
-  // Render landing immediately so the user is never staring at a blank page
-  // while the profile request is in flight.
+  // Show a clear loading screen so the user isn't staring at landing while we
+  // fetch their profile in the background.
   initializeDefaultData();
-  appScreen = "landing";
-  if (!getCountry()) { onbOpen = true; onbSelected = detectCountry(); }
-  render();
+  document.getElementById("root").innerHTML = `
+    <div class="oauth-splash">
+      <div class="oauth-splash-card">
+        <div class="oauth-splash-spinner"></div>
+        <div class="oauth-splash-title">Signing you in…</div>
+        <div class="oauth-splash-sub">Loading your data</div>
+      </div>
+    </div>`;
 
   // Then fetch the profile and switch into the app once it lands.
   mmApi.get('/api/user/profile')
@@ -1351,11 +1394,18 @@ if (_oaAt) {
       } else {
         console.warn('OAuth profile fetch returned no user — token may be invalid.');
         mmApi.tokenStore.clear();
+        appScreen = "landing";
+        if (!getCountry()) { onbOpen = true; onbSelected = detectCountry(); }
+        render();
       }
     })
     .catch(err => {
       console.error('OAuth boot failed:', err);
       mmApi.tokenStore.clear();
+      // Tear down splash and return to landing so the user isn't stuck on the spinner
+      appScreen = "landing";
+      if (!getCountry()) { onbOpen = true; onbSelected = detectCountry(); }
+      render();
       alert('Sign-in completed but loading your profile failed. Please try again. (See console for details.)');
     });
 } else {

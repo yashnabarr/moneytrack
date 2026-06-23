@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\HP\\\\Desktop\\\\wd\" -Force | Select-Object Name, Length; \"---NODE---\"; \\(Get-Command node -ErrorAction SilentlyContinue\\).Source)",
-      "Bash(node -e ' *)"
-    ]
-  }
-}

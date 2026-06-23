@@ -47,7 +47,9 @@
 
 /* ---------- ≤ 720px: phones ---------- */
 @media (max-width: 720px) {
-  .search, .footer-links { display: none; }
+  /* Keep the topbar search visible — autocomplete is the main mobile nav.
+     Sidebar.css handles its full-width behavior at ≤760px. */
+  .footer-links { display: none; }
   .page-head h1 { font-size: 30px; }
   .stats { grid-template-columns: 1fr; }
   .row2 { grid-template-columns: 1fr; }
@@ -62,4 +64,7 @@
 /* ---------- ≤ 520px: small phones ---------- */
 @media (max-width: 520px) {
   .popular-grid { grid-template-columns: repeat(2, 1fr); }
+  /* On very small screens, the page title competes with search for space — hide it. */
+  .topbar-title { display: none; }
+  .app-topbar { padding: 0 12px; }
 }

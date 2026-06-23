@@ -64,9 +64,13 @@ async function addFunds(req, res, next) {
     });
     if (!goal) return res.status(404).json({ error: 'Goal not found' });
 
+    // Cap saved at target so progress can't exceed 100%
+    const target = parseFloat(goal.target);
+    const newSaved = Math.min(target, parseFloat(goal.saved) + parseFloat(req.body.amount));
+
     const updated = await prisma.goal.update({
       where: { id: req.params.id },
-      data:  { saved: parseFloat(goal.saved) + parseFloat(req.body.amount) },
+      data:  { saved: newSaved },
     });
     res.json(serialize(updated));
   } catch (err) { next(err); }

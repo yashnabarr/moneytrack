@@ -180,7 +180,7 @@ The API is Vercel-ready via `backend/vercel.json`. If you never run the backend,
 
 ## Browser support
 
-Modern Chromium, Firefox, Safari, and Edge. Uses `Intl.NumberFormat`, `URL.createObjectURL`, CSS custom properties, and `backdrop-filter` (with `-webkit-` fallback). Light and dark themes are driven by a `theme-dark` class on `<html>`, applied before first paint via an inline script in `<head>` — no flash of unstyled content.
+Modern Chromium, Firefox, Safari, and Edge. Uses `Intl.NumberFormat`, `URL.createObjectURL`, CSS custom properties, `backdrop-filter` (with `-webkit-` fallback), and the Intersection Observer API. Light and dark themes are driven by a `theme-dark` class on `<html>`, applied before first paint via an inline script in `<head>` — no flash of unstyled content.
 
 ---
 

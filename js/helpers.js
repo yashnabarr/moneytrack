@@ -112,6 +112,12 @@ function formatMonth(d) {
   return "Target: " + dt.toLocaleDateString("en-US", { month: "short", year: "numeric" });
 }
 
+/** Cryptographically-strong unique id (modern browsers) with a fallback. */
+function newId() {
+  try { if (crypto && crypto.randomUUID) return crypto.randomUUID(); } catch (_) {}
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 11);
+}
+
 /** Today's date as ISO YYYY-MM-DD (local timezone). */
 function todayStr() {
   const d = new Date();

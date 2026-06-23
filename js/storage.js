@@ -67,7 +67,7 @@ function _syncDiff(key, oldList, newList) {
   newList.forEach(item => {
     if (oldMap.has(item.id)) {
       const prev = oldMap.get(item.id);
-      if (JSON.stringify(prev) !== JSON.stringify(item)) {
+      if (!_objectsEqual(prev, item)) {
         mmApi.put(`${endpoint}/${item.id}`, item).catch(e => console.error('sync update failed', e));
       }
     }
@@ -79,6 +79,18 @@ function _syncDiff(key, oldList, newList) {
       mmApi.del(`${endpoint}/${item.id}`).catch(e => console.error('sync delete failed', e));
     }
   });
+}
+
+/** Stable deep-equality check for the kind of plain objects we sync.
+ *  Sorts keys so two equivalent objects with different property order match. */
+function _objectsEqual(a, b) {
+  return _stableStringify(a) === _stableStringify(b);
+}
+function _stableStringify(v) {
+  if (v === null || typeof v !== 'object') return JSON.stringify(v);
+  if (Array.isArray(v)) return '[' + v.map(_stableStringify).join(',') + ']';
+  const keys = Object.keys(v).sort();
+  return '{' + keys.map(k => JSON.stringify(k) + ':' + _stableStringify(v[k])).join(',') + '}';
 }
 
 /**
@@ -98,9 +110,11 @@ async function loadFromApi() {
   }
 }
 
-/** Ensure empty buckets exist on first boot (unchanged from original). */
+/** Ensure empty buckets exist on first boot. */
 function initializeDefaultData() {
   if (storage.get(KEYS.transactions) === null) storage.save(KEYS.transactions, []);
   if (storage.get(KEYS.budgets)      === null) storage.save(KEYS.budgets,      []);
   if (storage.get(KEYS.goals)        === null) storage.save(KEYS.goals,        []);
+  if (storage.get(KEYS.recurring)    === null) storage.save(KEYS.recurring,    []);
+  if (storage.get(KEYS.splits)       === null) storage.save(KEYS.splits,       []);
 }

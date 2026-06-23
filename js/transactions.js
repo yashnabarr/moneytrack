@@ -213,7 +213,7 @@ function saveTx() {
     if (i !== -1) list[i] = { ...list[i], ...form, amount: Number(form.amount), title: form.title.trim() };
   } else {
     list.push({
-      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+      id: newId(),
       type: form.type, title: form.title.trim(), amount: Number(form.amount),
       category: form.category, date: form.date, payment: form.payment, description: form.description.trim(),
     });

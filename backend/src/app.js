@@ -2,6 +2,7 @@ require('dotenv').config();
 
 const express  = require('express');
 const cors     = require('cors');
+const helmet   = require('helmet');
 const passport = require('./config/passport');
 
 const authRoutes        = require('./routes/auth');
@@ -12,6 +13,12 @@ const userRoutes        = require('./routes/user');
 const { authenticate }  = require('./middleware/auth');
 
 const app = express();
+
+// ── Security headers ──────────────────────────────────────────────────────────
+// Helmet sets a reasonable set of defaults: X-Content-Type-Options, X-Frame-Options,
+// Strict-Transport-Security, Referrer-Policy, etc. CSP is left to Vercel's defaults
+// since this API only serves JSON (no HTML).
+app.use(helmet({ contentSecurityPolicy: false, crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 
 // ── CORS ──────────────────────────────────────────────────────────────────────
 const allowedOrigins = (process.env.CORS_ORIGINS || '')
@@ -29,7 +36,8 @@ app.use(cors({
 }));
 
 // ── Body parsing ──────────────────────────────────────────────────────────────
-app.use(express.json());
+// Explicit limit so a single bad request can't tie up the function with a 100MB body.
+app.use(express.json({ limit: '64kb' }));
 
 // ── Passport (stateless — no sessions) ───────────────────────────────────────
 app.use(passport.initialize());
@@ -49,12 +57,22 @@ app.use((_req, res) => res.status(404).json({ error: 'Not found' }));
 // ── Global error handler ──────────────────────────────────────────────────────
 // eslint-disable-next-line no-unused-vars
 app.use((err, _req, res, _next) => {
-  console.error(err);
-  // Surface Prisma unique-constraint violations cleanly
+  // Always log full error server-side for debugging
+  console.error('[error]', err);
+
+  // Prisma unique-constraint
   if (err.code === 'P2002') {
     return res.status(409).json({ error: 'Duplicate entry' });
   }
-  res.status(err.status || 500).json({ error: err.message || 'Internal server error' });
+
+  const status = err.status || 500;
+  // For 4xx (validation, CORS, etc.) the message is safe to surface to the client.
+  // For 5xx we must NOT leak internals (DB structure, file paths, stack traces).
+  const message = status < 500
+    ? (err.message || 'Request failed')
+    : 'Internal server error';
+
+  res.status(status).json({ error: message });
 });
 
 module.exports = app;

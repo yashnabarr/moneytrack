@@ -1,0 +1,17 @@
+{
+  "name": "pockit",
+  "version": "1.0.0",
+  "private": true,
+  "description": "PockIt — personal finance tracker. Zero-build vanilla HTML/CSS/JS frontend + optional Node/Express/Prisma backend.",
+  "scripts": {
+    "start": "npx http-server . -p 8080 --cors -c-1",
+    "dev": "npx http-server . -p 8080 --cors -c-1",
+    "backend:install": "cd backend && npm install",
+    "backend:dev": "cd backend && npm run dev",
+    "backend:start": "cd backend && npm start",
+    "backend:db:push": "cd backend && npm run db:push"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -142,7 +142,7 @@ function saveBudget() {
       formError = "A budget for this category already exists."; render(); return;
     }
     list.push({
-      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+      id: newId(),
       category: form.category, limit: Number(form.limit),
     });
   }

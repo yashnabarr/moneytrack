@@ -40,7 +40,11 @@
 
 /* ---------- Service ---------- */
 
-function _newId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+// Custom split is "balanced" if entered sum is within this many currency units of total.
+// Allows for one paise/cent of rounding without flagging as off-balance.
+const SPLIT_BALANCE_EPSILON = 0.01;
+
+function _newId() { return newId(); }
 
 /** Equal split with extra paise pushed to the FIRST participant for rounding. */
 function calcEqualSplit(total, n) {
@@ -205,7 +209,7 @@ function splitsHTML() {
     <div class="sp-section-title">${icon("schedule")} Active <span class="rec-count">${active.length}</span></div>
     <div class="sp-list">${active.map(splitCardHTML).join("")}</div>
   ` : `
-    <div class="sp-section-title">${icon("schedule")} Active <span class="rec-count">0</span></div>
+    <div class="sp-section-title">${icon("schedule")} Active</div>
     <div class="empty">No active splits — all settled up!</div>
   `;
 
@@ -226,7 +230,6 @@ function splitCardHTML(s) {
   const sign     = s.paidBy === "me" ? "+" : "-";
   const sideCls  = s.paidBy === "me" ? "side-owed" : "side-owes";
   const payerLbl = s.paidBy === "me" ? "You paid" : `${escapeHtml(s.payerName || "Someone")} paid`;
-  const me       = s.participants.find(p => p.isMe);
 
   const partRows = s.participants.map(p => {
     if (p.isMe && s.paidBy === "me") return ""; // skip own row when I paid (only show who owes)
@@ -251,7 +254,7 @@ function splitCardHTML(s) {
   });
 
   const remainingText = s.isSettled
-    ? `<span class="sp-settled-tag">${icon("check_circle")} Settled ${s.settledAt ? "on " + formatDate(new Date(s.settledAt).toISOString().slice(0, 10)) : ""}</span>`
+    ? `<span class="sp-settled-tag">${icon("check_circle")} Settled ${s.settledAt ? "on " + formatDate(dateToIso(new Date(s.settledAt))) : ""}</span>`
     : (remaining > 0
         ? `<span class="sp-remaining">${s.paidBy === "me" ? "Still owed" : "You owe"}: <b class="tnum">${money(remaining)}</b></span>`
         : `<span class="sp-remaining">All paid · ready to settle</span>`);
@@ -401,7 +404,7 @@ function splitModalHTML() {
 function splitBalanceBadge(total, enteredSum, splitType) {
   if (splitType !== "custom" || !total) return "";
   const diff = Math.round((total - enteredSum) * 100) / 100;
-  if (Math.abs(diff) <= 0.005) {
+  if (Math.abs(diff) <= SPLIT_BALANCE_EPSILON) {
     return `<span class="sp-balanced">${icon("check_circle")} Balanced</span>`;
   }
   return `<span class="sp-mismatch">${icon("warning")} Off by ${money(Math.abs(diff))}</span>`;
@@ -411,7 +414,7 @@ function splitBalanceBadge(total, enteredSum, splitType) {
 function splitCanSave(total, enteredSum, splitType) {
   if (!total || total <= 0) return false;
   if (splitType !== "custom") return true;
-  return Math.abs(total - enteredSum) <= 0.01;
+  return Math.abs(total - enteredSum) <= SPLIT_BALANCE_EPSILON;
 }
 
 /** Live partial DOM updates for split modal — keeps focus, runs on every keystroke.
@@ -495,7 +498,7 @@ function saveSplit() {
   recomputeShares();
   if (form.splitType === "custom") {
     const sum = form.participants.reduce((s, p) => s + (Number(p.share) || 0), 0);
-    if (Math.abs(total - sum) > 0.01)                  { formError = `Shares must sum to ${money(total)} (currently ${money(sum)}).`; render(); return; }
+    if (Math.abs(total - sum) > SPLIT_BALANCE_EPSILON) { formError = `Shares must sum to ${money(total)} (currently ${money(sum)}).`; render(); return; }
   }
 
   createSplit({

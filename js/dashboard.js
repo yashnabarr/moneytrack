@@ -98,6 +98,7 @@ function dashboardHTML() {
       </div>
       <div class="col">
         ${recurringDashboardHTML()}
+        ${splitsDashboardHTML()}
         <div class="card">
           <div class="card-head"><h3>Budgets</h3><button class="link-btn" data-nav="budgets">View All</button></div>
           ${budgetsHTML}

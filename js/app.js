@@ -136,6 +136,7 @@ const SEARCH_ITEMS = [
   { name: "Dashboard",      sub: "Overview & key stats",            icon: "dashboard",       tab: "dashboard",    aliases: "home main overview stats" },
   { name: "Transactions",   sub: "Income & expense log",            icon: "swap_horiz",      tab: "transactions", aliases: "tx entries history list payments" },
   { name: "Recurring",      sub: "Auto-add subscriptions & salary", icon: "autorenew",       tab: "recurring",    aliases: "subscription rent netflix bill repeat schedule auto" },
+  { name: "Splits",         sub: "Track shared expenses",            icon: "group",          tab: "splits",       aliases: "split owe owed roommate friend trip settle group" },
   { name: "Budgets",        sub: "Monthly category limits",         icon: "donut_small",     tab: "budgets",      aliases: "limit spending cap" },
   { name: "Savings Goals",  sub: "Targets & progress rings",        icon: "flag",            tab: "goals",        aliases: "goal target save fund" },
   { name: "Analytics",      sub: "Charts, trends & breakdowns",     icon: "monitoring",      tab: "analytics",    aliases: "report chart graph insight stat" },
@@ -751,6 +752,7 @@ function contentHTML() {
     case "dashboard":    return dashboardHTML();
     case "transactions": return transactionsHTML();
     case "recurring":    return recurringHTML();
+    case "splits":       return splitsHTML();
     case "budgets":      return budgetsHTML();
     case "goals":        return goalsHTML();
     case "analytics":    return analyticsHTML();
@@ -770,6 +772,7 @@ function modalHTML() {
   if (modalKind === "goal")      return goalModalHTML();
   if (modalKind === "funds")     return fundsModalHTML();
   if (modalKind === "recurring") return recurringModalHTML();
+  if (modalKind === "split")     return splitModalHTML();
   return txModalHTML();
 }
 
@@ -796,6 +799,10 @@ function readForm() {
   }
   if (modalKind === "recurring") {
     readRecurringForm();
+    return;
+  }
+  if (modalKind === "split") {
+    readSplitForm();
     return;
   }
   // tx (default)
@@ -1091,6 +1098,81 @@ function render() {
     })
   );
 
+  // ---- Split actions ----
+  root.querySelectorAll('[data-action="add-split"]').forEach(b =>
+    b.addEventListener("click", openSplitModal)
+  );
+  root.querySelectorAll("[data-sp-mark]").forEach(b =>
+    b.addEventListener("click", () => {
+      const [sid, pid] = b.getAttribute("data-sp-mark").split("|");
+      markParticipantPaid(sid, pid);
+      showToast("Marked as paid");
+      render();
+    })
+  );
+  root.querySelectorAll("[data-sp-unmark]").forEach(b =>
+    b.addEventListener("click", () => {
+      const [sid, pid] = b.getAttribute("data-sp-unmark").split("|");
+      unmarkParticipantPaid(sid, pid);
+      render();
+    })
+  );
+  root.querySelectorAll("[data-sp-settle]").forEach(b =>
+    b.addEventListener("click", () => {
+      settleSplit(b.getAttribute("data-sp-settle"));
+      showToast("Split settled");
+      render();
+    })
+  );
+  root.querySelectorAll("[data-sp-del]").forEach(b =>
+    b.addEventListener("click", () => {
+      if (!confirm("Delete this split? This cannot be undone.")) return;
+      deleteSplit(b.getAttribute("data-sp-del"));
+      showToast("Split deleted");
+      render();
+    })
+  );
+  // Modal-internal interactions (paidBy toggle, splitType, add/remove people)
+  if (modalOpen && modalKind === "split") {
+    root.querySelectorAll("[data-sp-paidby]").forEach(b =>
+      b.addEventListener("click", () => {
+        readSplitForm();
+        form.paidBy = b.getAttribute("data-sp-paidby");
+        if (form.paidBy === "me") form.payerName = "";
+        render();
+      })
+    );
+    root.querySelectorAll("[data-sp-stype]").forEach(b =>
+      b.addEventListener("click", () => {
+        readSplitForm();
+        form.splitType = b.getAttribute("data-sp-stype");
+        render();
+      })
+    );
+    root.querySelectorAll("[data-sp-premove]").forEach(b =>
+      b.addEventListener("click", () => {
+        readSplitForm();
+        const i = Number(b.getAttribute("data-sp-premove"));
+        form.participants.splice(i, 1);
+        render();
+      })
+    );
+    const addBtn = root.querySelector("[data-sp-padd]");
+    const addInput = root.querySelector("#f-spnew");
+    const addParticipant = () => {
+      readSplitForm();
+      const name = (form._newName || "").trim();
+      if (!name) { showToast("Enter a name first", "info"); return; }
+      form.participants.push({ id: _newId(), name, isMe: false, share: 0 });
+      form._newName = "";
+      render();
+    };
+    if (addBtn) addBtn.addEventListener("click", addParticipant);
+    if (addInput) addInput.addEventListener("keydown", e => {
+      if (e.key === "Enter") { e.preventDefault(); addParticipant(); }
+    });
+  }
+
   // ---- Pagination ----
   root.querySelectorAll("[data-page]").forEach(b =>
     b.addEventListener("click", () => { txPage = Number(b.getAttribute("data-page")); render(); window.scrollTo(0, 0); })
@@ -1121,7 +1203,7 @@ function render() {
       node.addEventListener("input", () => readForm())
     );
 
-    const saver = { tx: saveTx, budget: saveBudget, goal: saveGoal, funds: addFunds, recurring: saveRecurring }[modalKind];
+    const saver = { tx: saveTx, budget: saveBudget, goal: saveGoal, funds: addFunds, recurring: saveRecurring, split: saveSplit }[modalKind];
     root.querySelectorAll("[data-save]").forEach(b => b.addEventListener("click", saver));
   }
 

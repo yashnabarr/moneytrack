@@ -1162,15 +1162,35 @@ function render() {
     const addParticipant = () => {
       readSplitForm();
       const name = (form._newName || "").trim();
-      if (!name) { showToast("Enter a name first", "info"); return; }
+      if (!name) return;
       form.participants.push({ id: _newId(), name, isMe: false, share: 0 });
       form._newName = "";
+      // Mark which row to focus after re-render
+      window.__spFocusIdx = form.participants.length - 1;
       render();
     };
     if (addBtn) addBtn.addEventListener("click", addParticipant);
     if (addInput) addInput.addEventListener("keydown", e => {
       if (e.key === "Enter") { e.preventDefault(); addParticipant(); }
     });
+
+    // ---- Focus management after render ----
+    // Case 1: a person was just added → focus their amount (custom) or refocus name input (equal)
+    if (window.__spFocusIdx != null) {
+      const idx = window.__spFocusIdx;
+      window.__spFocusIdx = null;
+      requestAnimationFrame(() => {
+        if (form.splitType === "custom") {
+          const amtEl = root.querySelector(`[data-sp-pshare="${idx}"]`);
+          if (amtEl) { amtEl.focus(); amtEl.select(); }
+        } else if (addInput) {
+          addInput.focus();
+        }
+      });
+    } else if (addInput && form.participants.length <= 1 && !form.title) {
+      // Case 2: fresh modal (only "Me") → autofocus the name input
+      requestAnimationFrame(() => addInput.focus());
+    }
   }
 
   // ---- Pagination ----
@@ -1200,7 +1220,10 @@ function render() {
 
     // Keep `form` in sync as the user types (no re-render → no focus loss).
     root.querySelectorAll(".modal input, .modal select, .modal textarea").forEach(node =>
-      node.addEventListener("input", () => readForm())
+      node.addEventListener("input", () => {
+        readForm();
+        if (modalKind === "split") liveSplitUI();
+      })
     );
 
     const saver = { tx: saveTx, budget: saveBudget, goal: saveGoal, funds: addFunds, recurring: saveRecurring, split: saveSplit }[modalKind];

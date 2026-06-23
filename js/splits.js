@@ -309,18 +309,16 @@ function splitModalHTML() {
   recomputeShares();
   const enteredSum = form.participants.reduce((s, p) => s + (Number(p.share) || 0), 0);
   const total = Number(form.totalAmount) || 0;
-  const diff = Math.round((total - enteredSum) * 100) / 100;
-  const customMismatch = form.splitType === "custom" && Math.abs(diff) > 0.005;
 
   const partRows = form.participants.map((p, i) => `
     <div class="sp-edit-part">
       <span class="sp-edit-ic">${icon(p.isMe ? "person" : "person_outline")}</span>
       ${p.isMe
         ? `<span class="sp-edit-name">${escapeHtml(p.name)} (you)</span>`
-        : `<input class="sp-edit-name-input" type="text" data-sp-pname="${i}" value="${escapeHtml(p.name)}" placeholder="Name" />`}
+        : `<input class="sp-edit-name-input" type="text" data-sp-pname="${i}" value="${escapeHtml(p.name)}" placeholder="Name" autocomplete="off" />`}
       ${form.splitType === "custom"
-        ? `<input class="sp-edit-share" type="number" min="0" step="0.01" data-sp-pshare="${i}" value="${p.share}" />`
-        : `<span class="sp-edit-share-disp tnum">${money(p.share)}</span>`}
+        ? `<input class="sp-edit-share" type="number" min="0" step="0.01" placeholder="0" data-sp-pshare="${i}" value="${p.share || ""}" />`
+        : `<span class="sp-edit-share-disp tnum" data-sp-share-disp="${i}">${money(p.share)}</span>`}
       ${!p.isMe ? `<button type="button" class="icon-btn sp-rm" data-sp-premove="${i}" title="Remove">${icon("close")}</button>` : `<span style="width:32px"></span>`}
     </div>`).join("");
 
@@ -376,13 +374,13 @@ function splitModalHTML() {
             <label>People (${form.participants.length})</label>
             <div class="sp-edit-list">${partRows}</div>
             <div class="sp-add-row">
-              <input id="f-spnew" type="text" placeholder="Add person by name…" value="${escapeHtml(form._newName || "")}" />
-              <button type="button" class="btn-sm" data-sp-padd>${icon("add")} Add</button>
+              <input id="f-spnew" class="sp-new" type="text" placeholder="Add person by name…" value="${escapeHtml(form._newName || "")}" autocomplete="off" />
+              <button type="button" class="btn-sm" data-sp-padd id="sp-add-btn" ${(form._newName || "").trim() ? "" : "disabled"}>${icon("add")} Add</button>
             </div>
             <div class="sp-totals">
-              <span>Entered: <b class="tnum">${money(enteredSum)}</b></span>
-              <span>Total: <b class="tnum">${money(total)}</b></span>
-              ${customMismatch ? `<span class="sp-mismatch">${icon("warning")} Off by ${money(Math.abs(diff))}</span>` : ""}
+              <span>Entered: <b id="sp-entered" class="tnum">${money(enteredSum)}</b></span>
+              <span>Total: <b id="sp-totalDisp" class="tnum">${money(total)}</b></span>
+              <span id="sp-balance">${splitBalanceBadge(total, enteredSum, form.splitType)}</span>
             </div>
           </div>
 
@@ -393,10 +391,71 @@ function splitModalHTML() {
         </div>
         <div class="modal-foot">
           <button class="btn-ghost" data-close>Cancel</button>
-          <button class="btn-primary" data-save>${icon("check")} Create Split</button>
+          <button class="btn-primary" id="sp-create-btn" data-save ${splitCanSave(total, enteredSum, form.splitType) ? "" : "disabled"} title="${splitCanSave(total, enteredSum, form.splitType) ? "" : `Amounts must sum to ${money(total)}`}">${icon("check")} Create Split</button>
         </div>
       </div>
     </div>`;
+}
+
+/** Build the balance badge HTML (used both in initial render and live updates). */
+function splitBalanceBadge(total, enteredSum, splitType) {
+  if (splitType !== "custom" || !total) return "";
+  const diff = Math.round((total - enteredSum) * 100) / 100;
+  if (Math.abs(diff) <= 0.005) {
+    return `<span class="sp-balanced">${icon("check_circle")} Balanced</span>`;
+  }
+  return `<span class="sp-mismatch">${icon("warning")} Off by ${money(Math.abs(diff))}</span>`;
+}
+
+/** Whether the Create button should be enabled. */
+function splitCanSave(total, enteredSum, splitType) {
+  if (!total || total <= 0) return false;
+  if (splitType !== "custom") return true;
+  return Math.abs(total - enteredSum) <= 0.01;
+}
+
+/** Live partial DOM updates for split modal — keeps focus, runs on every keystroke.
+ *  Called from app.js on input events. Updates share displays (equal mode),
+ *  entered sum, balance badge, Create button state, and Add button state. */
+function liveSplitUI() {
+  if (!form || modalKind !== "split") return;
+  // Sync form values from DOM first
+  readSplitForm();
+  const total = Number(form.totalAmount) || 0;
+  const splitType = form.splitType;
+
+  let enteredSum = 0;
+  if (splitType === "equal") {
+    const shares = calcEqualSplit(total, form.participants.length);
+    form.participants.forEach((p, i) => {
+      p.share = shares[i] || 0;
+      const cell = document.querySelector(`[data-sp-share-disp="${i}"]`);
+      if (cell) cell.textContent = money(p.share);
+    });
+    enteredSum = shares.reduce((s, x) => s + x, 0);
+  } else {
+    document.querySelectorAll("[data-sp-pshare]").forEach(el => {
+      enteredSum += Number(el.value) || 0;
+    });
+    enteredSum = Math.round(enteredSum * 100) / 100;
+  }
+
+  const enteredEl = document.getElementById("sp-entered");
+  if (enteredEl) enteredEl.textContent = money(enteredSum);
+  const totalEl = document.getElementById("sp-totalDisp");
+  if (totalEl) totalEl.textContent = money(total);
+  const balEl = document.getElementById("sp-balance");
+  if (balEl) balEl.innerHTML = splitBalanceBadge(total, enteredSum, splitType);
+
+  const createBtn = document.getElementById("sp-create-btn");
+  if (createBtn) {
+    const canSave = splitCanSave(total, enteredSum, splitType);
+    createBtn.disabled = !canSave;
+    createBtn.title = canSave ? "" : `Amounts must sum to ${money(total)}`;
+  }
+
+  const addBtn = document.getElementById("sp-add-btn");
+  if (addBtn) addBtn.disabled = !(form._newName || "").trim();
 }
 
 /** Read all split-modal inputs into `form` (no re-render). */

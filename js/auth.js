@@ -69,8 +69,8 @@ function authHTML() {
           ${isSignup ? `<div class="auth-field"><input id="a-name" type="text" placeholder="Full Name" /></div>` : ""}
           <div class="auth-field"><input id="a-email" type="email" placeholder="Email Address" /></div>
           <div class="auth-field pw-wrap">
-            <input id="a-pass" type="${showPassword ? "text" : "password"}" placeholder="Password" />
-            <button type="button" class="pw-toggle" data-pwtoggle>${icon(showPassword ? "visibility_off" : "visibility")}</button>
+            <input id="a-pass" type="password" placeholder="Password" autocomplete="${isSignup ? "new-password" : "current-password"}" />
+            <button type="button" class="pw-toggle" data-pwtoggle aria-label="Show password">${icon("visibility")}</button>
           </div>
           ${isSignup ? `
           <div class="auth-hint">${icon("info")} Use at least 8 characters.</div>

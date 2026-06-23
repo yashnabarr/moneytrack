@@ -849,7 +849,7 @@ function render() {
     root.querySelectorAll("[data-auth]").forEach(b =>
       b.addEventListener("click", () => {
         authTab = b.getAttribute("data-auth");
-        appScreen = "auth"; showPassword = false;
+        appScreen = "auth";
         render(); window.scrollTo(0, 0);
       })
     );
@@ -873,8 +873,22 @@ function render() {
     root.querySelectorAll("[data-authtab]").forEach(b =>
       b.addEventListener("click", () => { authTab = b.getAttribute("data-authtab"); render(); })
     );
+    // Password-visibility toggle. CRITICAL: do NOT call render() here — a full
+    // re-render destroys and recreates the input elements, wiping anything the
+    // user has typed in the email/password fields. Instead, mutate the input's
+    // `type` attribute and the button's icon directly so the rest of the DOM
+    // (and the user's keystrokes) stay intact.
     root.querySelectorAll("[data-pwtoggle]").forEach(b =>
-      b.addEventListener("click", () => { showPassword = !showPassword; render(); })
+      b.addEventListener("click", () => {
+        const input = root.querySelector("#a-pass");
+        if (!input) return;
+        const showing = input.type === "text";
+        input.type = showing ? "password" : "text";
+        // Swap the eye icon to match the new state
+        const ic = b.querySelector(".material-symbols-outlined");
+        if (ic) ic.textContent = showing ? "visibility" : "visibility_off";
+        b.setAttribute("aria-label", showing ? "Show password" : "Hide password");
+      })
     );
     root.querySelectorAll("[data-back-landing]").forEach(b =>
       b.addEventListener("click", () => { appScreen = "landing"; render(); window.scrollTo(0, 0); })

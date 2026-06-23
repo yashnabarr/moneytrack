@@ -11,8 +11,8 @@ let sidebarCollapsed = false;       // desktop sidebar rail
 let mobileSidebarOpen = false;      // mobile slide-in drawer
 
 /* ----- Auth screen ----- */
-let authTab      = "signin";        // "signin" | "signup"
-let showPassword = false;
+let authTab = "signin";             // "signin" | "signup"
+// (password visibility is handled by direct DOM manipulation in app.js — no state needed)
 
 /* ----- Country / currency onboarding popup ----- */
 let onbOpen        = false;         // popup visible

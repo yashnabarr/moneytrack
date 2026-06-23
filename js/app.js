@@ -375,6 +375,8 @@ function settingsHTML() {
   const tx   = storage.get(KEYS.transactions, []).length;
   const bd   = storage.get(KEYS.budgets, []).length;
   const gl   = storage.get(KEYS.goals, []).length;
+  const rc   = storage.get(KEYS.recurring, []).length;
+  const sp   = storage.get(KEYS.splits, []).length;
   const c     = activeCountry();
   const isGuest = !!auth.guest;
   const name    = isGuest ? "Guest" : (auth.name || "User");
@@ -543,6 +545,8 @@ function settingsHTML() {
             <div class="sx-datastat"><b class="tnum">${tx}</b><span>Transactions</span></div>
             <div class="sx-datastat"><b class="tnum">${bd}</b><span>Budgets</span></div>
             <div class="sx-datastat"><b class="tnum">${gl}</b><span>Goals</span></div>
+            <div class="sx-datastat"><b class="tnum">${rc}</b><span>Recurring</span></div>
+            <div class="sx-datastat"><b class="tnum">${sp}</b><span>Splits</span></div>
           </div>
           <div class="sx-row">
             <div class="sx-row-main">
@@ -600,6 +604,12 @@ const FAQS = [
     a: "Yes. Go to <b>Settings → Data management</b>. You can export transactions as CSV for spreadsheets, or download a complete JSON backup you can restore later." },
   { q: "How do I change my currency?",
     a: "Open <b>Settings → Preferences → Currency &amp; region</b> and click <b>Change</b>. Pick your country and every amount across the app reformats instantly." },
+  { q: "How do recurring transactions work?",
+    a: "Open <b>Recurring</b> from the sidebar and click <b>+ Add Recurring</b>. Pick a frequency (daily, weekly, monthly, yearly) and a start date. PockIt auto-creates a transaction each time the cycle is due, even after you've been away for weeks." },
+  { q: "How do I track money owed between friends?",
+    a: "Use <b>Splits</b> in the sidebar. Create a split, list who paid and who's part of it, choose equal or custom shares, then mark each person as paid as they settle up. The dashboard shows your net owed/owing at a glance." },
+  { q: "What is the Calendar view?",
+    a: "Open <b>Calendar</b> to see every day of the month with green dots for income, red dots for expenses, and a 🔁 icon on future days where recurring transactions are due. Click any day to open its detail panel; use the <b>+ Add Transaction</b> button to log directly with that date." },
 ];
 
 function helpHTML() {
@@ -686,10 +696,12 @@ function helpHTML() {
 /** Download a full JSON backup of all locally-stored data. */
 function downloadBackup() {
   const data = {
-    app: "PockIt", version: 1, exportedAt: new Date().toISOString(),
+    app: "PockIt", version: 2, exportedAt: new Date().toISOString(),
     transactions: storage.get(KEYS.transactions, []),
     budgets:      storage.get(KEYS.budgets, []),
     goals:        storage.get(KEYS.goals, []),
+    recurring:    storage.get(KEYS.recurring, []),
+    splits:       storage.get(KEYS.splits, []),
     country:      storage.get(KEYS.country, null),
     prefs:        getPrefs(),
   };
@@ -711,11 +723,15 @@ function restoreBackup(file) {
       const tx = Array.isArray(d && d.transactions) ? d.transactions : null;
       const bd = Array.isArray(d && d.budgets)      ? d.budgets      : null;
       const gl = Array.isArray(d && d.goals)        ? d.goals        : null;
-      if (!tx && !bd && !gl) throw new Error("No PockIt data found in this file.");
-      if (!confirm("Restore this backup? It will replace your current transactions, budgets and goals.")) return;
+      const rc = Array.isArray(d && d.recurring)    ? d.recurring    : null;
+      const sp = Array.isArray(d && d.splits)       ? d.splits       : null;
+      if (!tx && !bd && !gl && !rc && !sp) throw new Error("No PockIt data found in this file.");
+      if (!confirm("Restore this backup? It will replace your current transactions, budgets, goals, recurring and splits.")) return;
       if (tx) storage.save(KEYS.transactions, tx);
       if (bd) storage.save(KEYS.budgets, bd);
       if (gl) storage.save(KEYS.goals, gl);
+      if (rc) storage.save(KEYS.recurring, rc);
+      if (sp) storage.save(KEYS.splits, sp);
       if (d.country && d.country.code) storage.save(KEYS.country, { code: d.country.code });
       if (d.prefs && typeof d.prefs === "object") storage.save(PREFS_KEY, Object.assign(getPrefs(), d.prefs));
       showToast("Backup restored");
@@ -947,8 +963,13 @@ function render() {
   root.querySelectorAll('[data-action="print"]').forEach(b => b.addEventListener("click", () => window.print()));
   root.querySelectorAll('[data-action="clear-data"]').forEach(b =>
     b.addEventListener("click", () => {
-      if (!confirm("This will permanently delete ALL your transactions, budgets and goals. Continue?")) return;
-      storage.save(KEYS.transactions, []); storage.save(KEYS.budgets, []); storage.save(KEYS.goals, []);
+      if (!confirm("This will permanently delete ALL your transactions, budgets, goals, recurring and splits. Continue?")) return;
+      storage.save(KEYS.transactions, []);
+      storage.save(KEYS.budgets, []);
+      storage.save(KEYS.goals, []);
+      storage.save(KEYS.recurring, []);
+      storage.save(KEYS.splits, []);
+      showToast("All data cleared");
       render();
     })
   );

@@ -93,6 +93,8 @@ function calPctChange(curr, prev) {
 function calPrevMonth() {
   if (calMonth === 0) { calMonth = 11; calYear--; }
   else                 calMonth--;
+  // Reset selection so calCurrentSelection() picks today (if in view) or the 1st
+  calSelectedDate = null;
   render();
 }
 
@@ -104,6 +106,7 @@ function calNextMonth() {
   if (target > maxDate) return;
   if (calMonth === 11) { calMonth = 0; calYear++; }
   else                  calMonth++;
+  calSelectedDate = null;
   render();
 }
 

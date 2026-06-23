@@ -345,11 +345,10 @@ function saveRecurring() {
     });
     showToast("Recurring transaction added");
   }
-  closeModal();
-  // After adding, immediately process so a "due today" item creates its first tx
+  // Process before closing so the single render() in closeModal() reflects new tx too
   const created = processRecurring();
-  if (created) showToast(`${created} transaction${created === 1 ? "" : "s"} auto-added`);
-  render();
+  if (created) setTimeout(() => showToast(`${created} transaction${created === 1 ? "" : "s"} auto-added`), 600);
+  closeModal();
 }
 
 /** Open the recurring modal (id=null for "Add"). */

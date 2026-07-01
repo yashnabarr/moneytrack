@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s https://moneytrack-phi.vercel.app/api/user/profile -H \"Authorization: Bearer fake\")",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(npx prisma *)",
+      "Bash(timeout 8 node api/index.js)",
+      "Bash(PORT=3099 timeout 5 node api/index.js)",
+      "Bash(PORT=3095 timeout 5 node api/index.js)",
+      "Bash(PORT=3094 timeout 5 node api/index.js)",
+      "Bash(node --check js/app.js)",
+      "Bash(node --check js/auth.js)",
+      "Bash(node --check js/state.js)",
+      "Bash(node --check js/helpers.js)",
+      "Bash(node --check js/storage.js)",
+      "Bash(node --check js/recurring.js)",
+      "Bash(node --check js/splits.js)",
+      "Bash(node --check js/calendar.js)",
+      "Bash(node --check js/transactions.js)",
+      "Bash(node --check js/analytics.js)",
+      "Bash(node --check src/app.js)",
+      "Bash(node --check src/config/passport.js)",
+      "Bash(node --check src/routes/transactions.js)",
+      "Bash(node --check js/landing.js)",
+      "Bash(git ls-remote *)"
+    ]
+  }
+}

@@ -4,6 +4,14 @@
     3-step "money into shape", CTA band, multi-col footer)
    ===================================================== */
 
+/* ===== Landing layout reset =====
+   The global `main { max-width:1280px; margin:auto; padding:… }` rule in
+   main.css is meant for the in-app pages. On the landing <main class="landing">
+   it would cap every section at 1280px and let the mint body show on the sides.
+   The landing sections are full-bleed by design (each has its own inner
+   max-width wrapper), so clear the cap here and let backgrounds span edge-to-edge. */
+main.landing { max-width: none; margin: 0; padding: 0; }
+
 /* ===== Sticky header ===== */
 .lp-header {
   position: sticky; top: 0; z-index: 50;
@@ -203,7 +211,7 @@
 /* ===== Bottom CTA band ===== */
 .cta-section {
   padding: 80px 24px; text-align: center;
-  background: linear-gradient(135deg, var(--container-low), var(--secondary-container));
+  background: linear-gradient(160deg, var(--container-low) 0%, var(--success-bg) 100%);
 }
 .cta-section h2 { font-size: 32px; font-weight: 700; letter-spacing: -.02em; }
 .cta-section p  { color: var(--on-surface-variant); font-size: 18px; margin: 14px auto 28px; max-width: 600px; }

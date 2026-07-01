@@ -39,9 +39,10 @@
   border: none; background: none; font-family: inherit; font-size: 15px;
   width: 100%; text-align: left;
   white-space: nowrap; overflow: hidden;
-  transition: background .15s, color .15s;
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
 }
 .sb-item:hover { background: var(--container-low); color: var(--primary); }
+.sb-item:active { transform: translateY(1px) scale(.99); }
 .sb-item.active { background: var(--primary); color: var(--on-primary); }
 .sb-item .material-symbols-outlined { font-size: 22px; flex-shrink: 0; }
 
@@ -66,8 +67,10 @@
   padding: 10px 12px; border-radius: 12px;
   border: none; background: none; cursor: pointer;
   color: var(--error); font-family: inherit; font-weight: 600; font-size: 14px;
+  transition: background var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
 }
 .sb-logout:hover { background: var(--error-container); }
+.sb-logout:active { transform: translateY(1px) scale(.99); }
 
 /* ===== Body + topbar ===== */
 .app-body { flex: 1; min-width: 0; display: flex; flex-direction: column; }

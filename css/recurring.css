@@ -20,7 +20,7 @@
   color: var(--on-surface-variant);
 }
 .rec-stat-val {
-  font-size: 28px; font-weight: 700; letter-spacing: -.01em;
+  font-size: var(--fs-stat); font-weight: 700; letter-spacing: -.01em;
   font-variant-numeric: tabular-nums;
 }
 

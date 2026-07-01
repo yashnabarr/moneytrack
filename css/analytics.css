@@ -25,7 +25,7 @@
 .insight p  { font-size: 14px; color: var(--on-surface-variant); line-height: 1.5; }
 
 .net-card p.lbl { font-size: 13px; font-weight: 600; color: var(--on-surface-variant); }
-.net-card .net-val { font-size: 34px; font-weight: 700; letter-spacing: -.01em; margin-top: 4px; }
+.net-card .net-val { font-size: var(--fs-stat); font-weight: 700; letter-spacing: -.01em; margin-top: 4px; }
 
 /* ===== Generic chart container ===== */
 svg.chart {

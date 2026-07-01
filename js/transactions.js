@@ -68,33 +68,18 @@ function txRowHTML(t) {
     </div>`;
 }
 
-function transactionsHTML() {
+/**
+ * The filter-dependent part of the transactions page (list + pager).
+ * Split out from the page shell so the search box can refresh just this
+ * region on each keystroke instead of triggering a full app re-render —
+ * the #txSearch input itself stays in the DOM, so focus/caret are preserved.
+ */
+function txResultsHTML() {
   const all = getFilteredTx();
   const totalPages = Math.max(1, Math.ceil(all.length / PER_PAGE));
   if (txPage > totalPages) txPage = totalPages;
   const start = (txPage - 1) * PER_PAGE;
   const pageItems = all.slice(start, start + PER_PAGE);
-
-  const catOptions = ["<option value='all'>All Categories</option>"]
-    .concat([].concat(CATEGORIES.income, CATEGORIES.expense)
-      .map(c => `<option value="${c}" ${txCategory === c ? "selected" : ""}>${c}</option>`)).join("");
-
-  const filterBar = `
-    <div class="filter-bar">
-      <div class="filter-search">${icon("search")}<input id="txSearch" type="text" placeholder="Search transactions..." value="${escapeHtml(txSearch)}" /></div>
-      <select class="filter-select" data-filter="category">${catOptions}</select>
-      <select class="filter-select" data-filter="date">
-        <option value="all"    ${txDate === "all"    ? "selected" : ""}>Any Date</option>
-        <option value="month"  ${txDate === "month"  ? "selected" : ""}>This Month</option>
-        <option value="30days" ${txDate === "30days" ? "selected" : ""}>Last 30 Days</option>
-        <option value="year"   ${txDate === "year"   ? "selected" : ""}>This Year</option>
-      </select>
-      <select class="filter-select" data-filter="type">
-        <option value="all"     ${txType === "all"     ? "selected" : ""}>All Types</option>
-        <option value="income"  ${txType === "income"  ? "selected" : ""}>Income</option>
-        <option value="expense" ${txType === "expense" ? "selected" : ""}>Expense</option>
-      </select>
-    </div>`;
 
   const rawCount = storage.get(KEYS.transactions, []).length;
   let body;
@@ -120,14 +105,38 @@ function transactionsHTML() {
       </div>`;
   }
 
+  return body + pager;
+}
+
+function transactionsHTML() {
+  const catOptions = ["<option value='all'>All Categories</option>"]
+    .concat([].concat(CATEGORIES.income, CATEGORIES.expense)
+      .map(c => `<option value="${c}" ${txCategory === c ? "selected" : ""}>${c}</option>`)).join("");
+
+  const filterBar = `
+    <div class="filter-bar">
+      <div class="filter-search">${icon("search")}<input id="txSearch" type="text" placeholder="Search transactions..." value="${escapeHtml(txSearch)}" /></div>
+      <select class="filter-select" data-filter="category">${catOptions}</select>
+      <select class="filter-select" data-filter="date">
+        <option value="all"    ${txDate === "all"    ? "selected" : ""}>Any Date</option>
+        <option value="month"  ${txDate === "month"  ? "selected" : ""}>This Month</option>
+        <option value="30days" ${txDate === "30days" ? "selected" : ""}>Last 30 Days</option>
+        <option value="year"   ${txDate === "year"   ? "selected" : ""}>This Year</option>
+      </select>
+      <select class="filter-select" data-filter="type">
+        <option value="all"     ${txType === "all"     ? "selected" : ""}>All Types</option>
+        <option value="income"  ${txType === "income"  ? "selected" : ""}>Income</option>
+        <option value="expense" ${txType === "expense" ? "selected" : ""}>Expense</option>
+      </select>
+    </div>`;
+
   return `
     <div class="page-head">
       <div><h1>Transactions</h1><p>Manage and review your recent financial activity.</p></div>
       <button class="btn-primary" data-action="add-tx">${icon("add")} Add Transaction</button>
     </div>
     ${filterBar}
-    ${body}
-    ${pager}`;
+    <div id="tx-results">${txResultsHTML()}</div>`;
 }
 
 /* ===== Add / Edit modal ===== */

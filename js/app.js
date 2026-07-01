@@ -839,6 +839,45 @@ function readForm() {
    RENDER + EVENT WIRING
    ========================================================= */
 
+/**
+ * Wire the transaction results region (rows + pagination). Called from the
+ * main render pass and again after a search-driven partial refresh, so the
+ * fresh nodes inside #tx-results always get their handlers. Selectors are
+ * scoped to #tx-results so re-wiring never double-binds anything else.
+ */
+function wireTxResults(root) {
+  const box = root.querySelector("#tx-results");
+  if (!box) return;
+
+  // Row expand / collapse
+  box.querySelectorAll("[data-toggle]").forEach(el =>
+    el.addEventListener("click", () => {
+      const id = el.getAttribute("data-toggle");
+      if (openTxIds.has(id)) openTxIds.delete(id); else openTxIds.add(id);
+      box.innerHTML = txResultsHTML();
+      wireTxResults(root);
+    })
+  );
+
+  // Row edit / delete
+  box.querySelectorAll("[data-edit]").forEach(b =>
+    b.addEventListener("click", e => { e.stopPropagation(); openModal(b.getAttribute("data-edit")); })
+  );
+  box.querySelectorAll("[data-del]").forEach(b =>
+    b.addEventListener("click", e => { e.stopPropagation(); deleteTx(b.getAttribute("data-del")); })
+  );
+
+  // Pagination — refresh just this region and jump to the top of the list
+  box.querySelectorAll("[data-page]").forEach(b =>
+    b.addEventListener("click", () => {
+      txPage = Number(b.getAttribute("data-page"));
+      box.innerHTML = txResultsHTML();
+      wireTxResults(root);
+      window.scrollTo(0, 0);
+    })
+  );
+}
+
 function render() {
   const root = document.getElementById("root");
 
@@ -1082,7 +1121,14 @@ function render() {
   // ---- Transactions: filters ----
   const search = root.querySelector("#txSearch");
   if (search) {
-    search.addEventListener("input", e => { txSearch = e.target.value; txPage = 1; focusSearch = true; render(); });
+    // Refresh only the results region so the search input keeps native focus
+    // and caret position — no full app re-render on each keystroke.
+    search.addEventListener("input", e => {
+      txSearch = e.target.value; txPage = 1;
+      const box = root.querySelector("#tx-results");
+      if (box) { box.innerHTML = txResultsHTML(); wireTxResults(root); }
+      else { focusSearch = true; render(); }
+    });
   }
   root.querySelectorAll("[data-filter]").forEach(sel =>
     sel.addEventListener("change", e => {
@@ -1094,22 +1140,9 @@ function render() {
     })
   );
 
-  // ---- Transactions: expand/collapse ----
-  root.querySelectorAll("[data-toggle]").forEach(el =>
-    el.addEventListener("click", () => {
-      const id = el.getAttribute("data-toggle");
-      if (openTxIds.has(id)) openTxIds.delete(id); else openTxIds.add(id);
-      render();
-    })
-  );
-
-  // ---- Transactions: edit / delete ----
-  root.querySelectorAll("[data-edit]").forEach(b =>
-    b.addEventListener("click", e => { e.stopPropagation(); openModal(b.getAttribute("data-edit")); })
-  );
-  root.querySelectorAll("[data-del]").forEach(b =>
-    b.addEventListener("click", e => { e.stopPropagation(); deleteTx(b.getAttribute("data-del")); })
-  );
+  // ---- Transactions: row expand/collapse, edit/delete, pagination ----
+  // All live inside #tx-results, so they can be re-wired on a partial refresh.
+  wireTxResults(root);
 
   // ---- Recurring actions ----
   root.querySelectorAll('[data-action="add-recurring"]').forEach(b =>
@@ -1304,10 +1337,6 @@ function render() {
     }
   }
 
-  // ---- Pagination ----
-  root.querySelectorAll("[data-page]").forEach(b =>
-    b.addEventListener("click", () => { txPage = Number(b.getAttribute("data-page")); render(); window.scrollTo(0, 0); })
-  );
 
   // ---- Modal events ----
   if (modalOpen) {

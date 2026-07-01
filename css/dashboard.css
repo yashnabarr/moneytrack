@@ -20,7 +20,7 @@
   font-size: 14px; font-weight: 600; letter-spacing: .05em;
   color: var(--on-surface-variant); margin-bottom: 6px;
 }
-.stat-value { font-size: 32px; font-weight: 700; letter-spacing: -.01em; }
+.stat-value { font-size: var(--fs-stat); font-weight: 700; letter-spacing: -.01em; }
 .stat-badge {
   width: 40px; height: 40px; border-radius: 9999px;
   display: flex; align-items: center; justify-content: center;
@@ -86,7 +86,7 @@
   background: var(--container-lowest); border: 1px solid var(--border-soft);
   border-radius: 12px; box-shadow: var(--soft-shadow); overflow: hidden;
 }
-.tx-main { display: flex; align-items: center; justify-content: space-between; padding: 16px; cursor: pointer; }
+.tx-main { display: flex; align-items: center; justify-content: space-between; padding: 16px; cursor: pointer; transition: background var(--dur-fast) var(--ease-out); }
 .tx-main:hover { background: var(--container-low); }
 .tx-left { display: flex; align-items: center; gap: 16px; }
 .tx-icon {
@@ -100,7 +100,7 @@
 .tx-right { display: flex; align-items: center; gap: 14px; }
 .tx-amount { font-weight: 600; font-variant-numeric: tabular-nums; font-size: 15px; }
 .tx-amount.income { color: var(--primary); }
-.chev { color: var(--on-surface-variant); transition: transform .2s; }
+.chev { color: var(--on-surface-variant); transition: transform var(--dur-base) var(--ease-out); }
 .tx.open .chev { transform: rotate(180deg); }
 .tx-details {
   padding: 4px 16px 16px 76px; display: none;
@@ -131,7 +131,7 @@
   border-radius: 16px; padding: 20px 24px; box-shadow: var(--soft-shadow);
 }
 .sumcard p  { font-size: 14px; font-weight: 600; letter-spacing: .03em; color: var(--on-surface-variant); margin-bottom: 6px; }
-.sumcard h3 { font-size: 28px; font-weight: 700; }
+.sumcard h3 { font-size: var(--fs-stat); font-weight: 700; }
 
 .budget-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
 .budget-card { position: relative; }
@@ -145,7 +145,7 @@
 .b-name   { font-weight: 600; font-size: 16px; }
 .b-period { font-size: 13px; color: var(--on-surface-variant); }
 .budget-amounts { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 10px; }
-.budget-spent { font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.budget-spent { font-size: var(--fs-stat); font-weight: 700; font-variant-numeric: tabular-nums; }
 .budget-limit { font-size: 14px; color: var(--on-surface-variant); }
 
 .progress-track { width: 100%; background: var(--secondary-container); border-radius: 9999px; height: 10px; overflow: hidden; }
@@ -175,7 +175,7 @@
 .goal-name { font-weight: 600; font-size: 17px; }
 .goal-date { font-size: 13px; color: var(--on-surface-variant); margin-top: 2px; }
 .goal-mid  { display: flex; justify-content: space-between; align-items: center; margin: 18px 0 14px; gap: 12px; }
-.goal-amount { font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.goal-amount { font-size: var(--fs-stat); font-weight: 700; font-variant-numeric: tabular-nums; }
 .goal-of     { font-size: 14px; color: var(--on-surface-variant); margin-top: 2px; }
 
 /* Circular progress ring (SVG) */

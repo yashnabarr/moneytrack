@@ -33,6 +33,30 @@
   --outline:                 #6c7a71;
   --outline-variant:         #bbcabf;
   --soft-shadow: 0 4px 20px rgba(0,0,0,.05);
+  --shadow-float: 0 20px 50px rgba(0,0,0,.15);   /* floating cards, mockups, modals */
+
+  /* ---- Radius scale (one corner-rounding language, used everywhere) ---- */
+  --radius-sm:   10px;    /* chips, small controls, store badges */
+  --radius-md:   12px;    /* inputs, compact buttons, tx rows */
+  --radius-lg:   16px;    /* cards, modals, mockups */
+  --radius-pill: 9999px;  /* pill buttons, avatars, progress tracks */
+
+  /* ---- Motion (shared easing + durations) ---- */
+  --ease-out:  cubic-bezier(.22,.61,.36,1);
+  --dur-fast:  .15s;
+  --dur-base:  .22s;
+
+  /* ---- Type scale (one sizing system across the whole app) ---- */
+  --fs-display: 48px;   /* landing hero headline only */
+  --fs-h1:      30px;   /* app page titles (Dashboard, Transactions, …) */
+  --fs-h2:      20px;   /* modal titles, prominent headings */
+  --fs-h3:      18px;   /* card headers */
+  --fs-stat:    28px;   /* headline monetary figures (balances, totals) */
+  --fs-lead:    18px;   /* hero / section lead paragraphs */
+  --fs-body:    15px;   /* default body text */
+  --fs-label:   14px;   /* form labels, stat labels */
+  --fs-sm:      13px;   /* meta / sub-text */
+  --fs-xs:      12px;   /* chips, fine print */
 
   /* ---- Semantic helper tokens (theme-aware) ---- */
   --border-soft:    rgba(187,202,191,.30);   /* hairline card / divider border */
@@ -85,6 +109,7 @@ html.theme-dark {
   --outline:                 #8b97a8;
   --outline-variant:         #3a4661;   /* input / button borders */
   --soft-shadow: 0 6px 24px rgba(0,0,0,.45);
+  --shadow-float: 0 24px 60px rgba(0,0,0,.55);
 
   --border-soft:    rgba(255,255,255,.09);
   --border-strong:  rgba(255,255,255,.14);
@@ -139,8 +164,8 @@ main { max-width: 1280px; margin: 0 auto; padding: 32px 24px 48px; }
   display: flex; justify-content: space-between; align-items: flex-end;
   margin-bottom: 32px; flex-wrap: wrap; gap: 16px;
 }
-.page-head h1 { font-size: 40px; font-weight: 700; letter-spacing: -.02em; margin-bottom: 6px; }
-.page-head p  { font-size: 18px; color: var(--on-surface-variant); }
+.page-head h1 { font-size: var(--fs-h1); font-weight: 700; letter-spacing: -.02em; margin-bottom: 6px; }
+.page-head p  { font-size: var(--fs-body); color: var(--on-surface-variant); }
 
 /* ===== Buttons ===== */
 .btn-primary {
@@ -178,8 +203,45 @@ main { max-width: 1280px; margin: 0 auto; padding: 32px 24px 48px; }
 .icon-btn {
   background: none; border: none; cursor: pointer;
   color: var(--on-surface-variant); display: flex;
+  transition: color var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
 }
 .icon-btn:hover { color: var(--on-surface); }
+
+/* =====================================================
+   Universal click feedback
+   Every interactive control gets a consistent transition and an
+   instant "pressed" state, so a click is acknowledged immediately
+   even when the underlying action (save, filter, nav) takes a moment.
+   The :active pseudo-class raises specificity above each base class,
+   so this applies across every screen regardless of stylesheet order.
+   ===================================================== */
+.btn-primary, .btn-ghost, .btn-sm, .link-btn, .btn-outline, .btn-pill,
+.btn-hero, .page-btn, .fund-btn, .type-toggle button, .badge-btn,
+.btn-auth, .btn-social, .auth-guest, .icon-btn-lg {
+  transition: background var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out),
+              color var(--dur-fast) var(--ease-out),
+              box-shadow var(--dur-base) var(--ease-out),
+              transform var(--dur-fast) var(--ease-out);
+}
+.btn-primary:not(:disabled):active,
+.btn-ghost:not(:disabled):active,
+.btn-sm:not(:disabled):active,
+.link-btn:not(:disabled):active,
+.btn-outline:not(:disabled):active,
+.btn-pill:not(:disabled):active,
+.btn-hero:not(:disabled):active,
+.page-btn:not(:disabled):active,
+.fund-btn:not(:disabled):active,
+.type-toggle button:not(:disabled):active,
+.badge-btn:not(:disabled):active,
+.btn-auth:not(:disabled):active,
+.btn-social:not(:disabled):active,
+.auth-guest:not(:disabled):active,
+.icon-btn:not(:disabled):active,
+.icon-btn-lg:not(:disabled):active {
+  transform: translateY(1px) scale(.985);
+}
 
 /* ===== Cards ===== */
 .card {
@@ -188,7 +250,7 @@ main { max-width: 1280px; margin: 0 auto; padding: 32px 24px 48px; }
   border-radius: 16px; padding: 24px; box-shadow: var(--soft-shadow);
 }
 .card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.card-head h3 { font-size: 24px; font-weight: 600; }
+.card-head h3 { font-size: var(--fs-h3); font-weight: 600; }
 .card-actions { display: flex; gap: 4px; }
 
 /* ===== Modals ===== */
@@ -196,18 +258,28 @@ main { max-width: 1280px; margin: 0 auto; padding: 32px 24px 48px; }
   position: fixed; inset: 0; z-index: 100; padding: 16px;
   background: rgba(0,0,0,.4); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
   display: flex; align-items: center; justify-content: center;
+  animation: modal-overlay-in var(--dur-base) var(--ease-out);
 }
 .modal {
-  background: var(--container-lowest); border-radius: 16px;
+  background: var(--container-lowest); border-radius: var(--radius-lg);
   width: 100%; max-width: 480px;
-  box-shadow: 0 20px 50px rgba(0,0,0,.15);
+  box-shadow: var(--shadow-float);
   max-height: 92vh; overflow: auto;
+  animation: modal-pop-in .28s var(--ease-out);
+}
+@keyframes modal-overlay-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes modal-pop-in {
+  from { opacity: 0; transform: translateY(12px) scale(.985); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .modal-overlay, .modal { animation: none !important; }
 }
 .modal-head {
   display: flex; justify-content: space-between; align-items: center;
   padding: 24px; border-bottom: 1px solid var(--surface-variant);
 }
-.modal-head h2 { font-size: 24px; font-weight: 600; }
+.modal-head h2 { font-size: var(--fs-h2); font-weight: 600; }
 .modal-body { padding: 24px; display: flex; flex-direction: column; gap: 16px; }
 .modal-foot { display: flex; gap: 12px; justify-content: flex-end; padding: 0 24px 24px; }
 
@@ -251,7 +323,7 @@ main { max-width: 1280px; margin: 0 auto; padding: 32px 24px 48px; }
 
 .placeholder { text-align: center; padding: 56px 24px; }
 .placeholder .material-symbols-outlined { font-size: 56px; color: var(--primary); }
-.placeholder h2 { font-size: 24px; font-weight: 700; margin: 12px 0 8px; }
+.placeholder h2 { font-size: var(--fs-h2); font-weight: 700; margin: 12px 0 8px; }
 .placeholder p  { color: var(--on-surface-variant); }
 
 /* ===== Status chips ===== */

@@ -44,7 +44,7 @@ function landingHTML() {
                 <div class="av" style="background:#dae2fd;color:#3f465c">A</div>
                 <div class="av" style="background:#d7f0e4;color:#00422b">B</div>
                 <div class="av" style="background:#e7ddff;color:#3a1f7a">C</div>
-                <div class="av" style="background:var(--secondary-container);color:var(--on-secondary-container);font-size:12px">+10k</div>
+                <div class="av" style="background:var(--secondary-container);color:var(--secondary);font-size:12px">+10k</div>
               </div>
               <div>
                 <div class="stars">★★★★★</div>

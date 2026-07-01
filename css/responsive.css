@@ -2,9 +2,15 @@
    responsive.css — all media queries in one place
    ===================================================== */
 
+/* ---------- ≤ 1200px: narrow desktop ---------- */
+/* The fixed 264px sidebar + a 4-across stat row overflow between
+   ~1024px and ~1200px, so collapse stats to 2 columns earlier. */
+@media (max-width: 1200px) {
+  .stats { grid-template-columns: repeat(2, 1fr); }
+}
+
 /* ---------- ≤ 1024px: tablets ---------- */
 @media (max-width: 1024px) {
-  .stats { grid-template-columns: repeat(2, 1fr); }
   .bento { grid-template-columns: 1fr; }
 }
 

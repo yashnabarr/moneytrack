@@ -26,7 +26,7 @@
 }
 .sp-stat-label .material-symbols-outlined { font-size: 16px; }
 .sp-stat-val {
-  font-size: 28px; font-weight: 700; letter-spacing: -.01em;
+  font-size: var(--fs-stat); font-weight: 700; letter-spacing: -.01em;
   font-variant-numeric: tabular-nums;
 }
 .sp-stat.owed .sp-stat-val { color: var(--primary); }
